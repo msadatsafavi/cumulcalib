@@ -1,9 +1,9 @@
 #' @export
-cumulcalib <- function(y, p, method=c('twopart','onepart','twopartw','onepartw'), ordered=F, n_sim=0)
+cumulcalib <- function(y, p, method=c('twopart','onepart','twopart-bridge', 'onepart-bridge'), ordered=F, n_sim=0)
 {
   out <- list()
 
-  details <- list()
+  methods <- list()
 
   if(!ordered)
   {
@@ -14,63 +14,77 @@ cumulcalib <- function(y, p, method=c('twopart','onepart','twopartw','onepartw')
 
   n <- length(p)
 
+  T_ <- sum(p*(1-p)) #Total 'time'
+  t <- cumsum(p*(1-p))/T_
+  X <- p
+  S <- cumsum(y-p)/sqrt(T_)
+
   for(i in 1:length(method))
   {
     mt <- method[i]
 
-    if(mt %in% c('twopart', 'onepart'))
+    if(mt %in% c('twopart','twopart-bridge'))
     {
-      t <- sum(p*(1-p)) #Total 'time'
-      X <- cumsum(p*(1-p))/t
-      Y <- cumsum(y-p)/sqrt(t)
-    }
-    if(mt %in% c('twopartw', 'onepartw'))
-    {
-      t <- n
-      X <- (1:n)/n
-      Y <- cumsum((y-p)/(sqrt(p*(1-p))))/sqrt(t)
-    }
+      stat1 <- S[n]
+      pval1 <- 2*pnorm(-abs(S[n]),0,1) #Two-sided z test
 
-    if(mt %in% c('twopart','twopartw'))
-    {
-      stat1 <- Y[n]
-      pval1 <- 2*pnorm(-abs(Y[n]),0,1) #Two-sided z test
-
-      Y <- Y- Y[n]*X/X[n]
-
-      loc <- which.max(abs(Y))
-      stat2 <- max(abs(Y))
-      pval2 <- 1-pKolmogorov(stat2)
-
-      stat <- c(mean=stat1, distance=stat2)
-      details[[mt]]$stat <- stat
+      if(mt=='twopart-bridge')
+      {
+        S2 <- S-S[n]*t/t[n]
+        loc <- which.max(abs(S2))
+        stat2 <- max(abs(S2))
+        pval2 <- 1-pKolmogorov(stat2)
+      }
+      else
+      {
+        loc <- which.max(abs(S))
+        stat2 <- max(abs(S))
+        pval2 <- 1-pAbsuluteDistanceConditional(stat2, w1=S[n])
+      }
 
       fisher <- -2*(log(pval1)+log(pval2))
       pval <- 1-pchisq(fisher,4)
-      details[[mt]]$pval <- c(combined=pval, mean=pval1, distnce=pval2)
+
+      methods[[mt]]$stat <- fisher
+      methods[[mt]]$pval <- pval
+      methods[[mt]]$stat_by_component <- c(mean=stat1, distance=stat2)
+      methods[[mt]]$pval_by_component <- c(mean=pval1, distnce=pval2)
+      methods[[mt]]$loc <- loc
     }
 
-    if(mt %in% c('onepart','onepartw'))
+    if(mt %in% c('onepart','onepart-bridge'))
     {
-      stat <- max(abs(Y))
-      loc <- which.max(abs(Y))
-      pval <- 1-erdos(stat)
-      details[[mt]]$stat <- stat
-      details[[mt]]$pval <- pval
-    }
-
-    if(i==1) #First method is the default and gets to return the X and Y
-    {
-      out$method <- mt
-      out$X <- X
-      out$Y <- Y
-      out$stat <- stat
-      out$pval <- pval
-      out$loc <- loc
+      if(mt=='onepart-bridge')
+      {
+        S2 <- S- S[n]*t/t[n]
+        loc <- which.max(abs(S2))
+        stat <- max(abs(S2))
+        pval <- 1-pKolmogorov(stat)
+        methods[[mt]]$stat <- stat
+        methods[[mt]]$pval <- pval
+        methods[[mt]]$loc <- loc
+      }
+      else
+      {
+        stat <- max(abs(S))
+        loc <- which.max(abs(S))
+        pval <- 1-erdos(stat)
+        methods[[mt]]$stat <- stat
+        methods[[mt]]$pval <- pval
+        methods[[mt]]$loc <- loc
+      }
     }
   }
 
-  out$details <- details
+  out$data <- cbind(X=X,t=t,S=S)
+  out$method <- names(methods[1])
+  #Copy the first method results to root of the list
+  for(nm in names(methods[[1]]))
+  {
+    out[nm] <- methods[[1]][nm]
+  }
+  out$by_method <- methods
+
   class(out) <- "cumulcalib"
   return(out)
 }
@@ -89,6 +103,8 @@ erdos <- function(x, max_m=100)
 
   return(4/pi*out)
 }
+
+
 
 
 
@@ -136,26 +152,76 @@ pKolmogorov <- function (q, summands = ceiling(q * sqrt(72) + 3/2))
 
 
 
-#' @export
-plot.cumulcalib <- function(cumulcalib_obj,...)
+pAbsuluteDistanceConditional <- function(q, w1, method=2, exp_tolerance=-30, summands = ceiling(q * sqrt(72) + 3/2))
 {
-  if(cumulcalib_obj$method %in% c('twopart','twopartw'))
+  out <- c()
+  if(1 %in% method)
   {
-    n <- length(cumulcalib_obj$Y)
-    l <- cumulcalib_obj$stat[1]*(1:n)/n
-    Y <- cumulcalib_obj$Y + l
-    plot(cumulcalib_obj$X,Y,type='l',xlim=c(0,1),ylim=c(min(Y),max(Y)),...)
-    lines(c(0,1),c(0,0),col="grey")
-    lines(c(0,1),c(0,Y[n]),col="grey")
-    lines(c(1,1),c(0,Y[n]),col="blue")
-    loc <- cumulcalib_obj$loc
-    lines(c(cumulcalib_obj$X[loc],cumulcalib_obj$X[loc]),c(l[loc],Y[loc]),col="red")
+    A <- -2*q*q
+    B <- 2*q*w1
+    C <- -exp_tolerance
+    D <- sqrt(B*B-4*A*C)
+
+    n <- seq(round((-B+D)/A/2,0), round((-B-D)/A/2,0))
+    un <- 2*n*q
+
+    terms <- un*w1-un^2/2
+    out <- c(out,sum((-1)^n*exp(terms)))
   }
-  else
+  if(2 %in% method)
   {
-    plot(cumulcalib_obj$X,cumulcalib_obj$Y,type='l',xlim=c(0,1),ylim=c(min(cumulcalib_obj$Y),max(cumulcalib_obj$Y)),...)
-    lines(c(0,1),c(0,0),col="grey")
+    out <- c(out,sqrt(2*pi)/q*sum(exp(w1^2/2-(2*(1:summands)-1)^2*pi^2/(8*q^2))*(cos((2*(1:summands)-1)*pi*w1/2/q))))
+  }
+  out
+}
+
+
+
+
+#' @export
+plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_stats=T, ...)
+{
+  if(is.null(method))
+  {
+    method <- cumulcalib_obj$method
+  }
+
+  S <- cumulcalib_obj$data[,'S']
+  n <- length(S)
+
+  #If not standardized, then use predictions instead of times, and also make Y divided by n rather than sqrt(T)
+  if(standardized)
+  {
+    X <- cumulcalib_obj$data[,'t']
+  }else{
+    X <- cumulcalib_obj$data[,'X']
+    S <- S*sqrt(sum(cumulcalib_obj$data[,'t']))/n
+  }
+
+
+  plot(X,S,type='l',xlim=c(0,1),ylim=c(min(S),max(S)),...)
+  lines(c(0,1),c(0,0),col="grey")
+  if(draw_stats)
+  {
+    if(method %in% c('twopart','twopart-bridge')) #Mean line only for two-part tests
+    {
+      lines(c(1,1),c(0,S[n]),col="blue")
+    }
+
     loc <- cumulcalib_obj$loc
-    lines(c(cumulcalib_obj$X[loc],cumulcalib_obj$X[loc]),c(0,Y[loc]),col="red")
+    if(method %in% c('onepart-bridge','twopart-bridge')) #If bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
+    {
+      if(standardized)
+      {
+        lines(c(0,1),c(0,S[n]),col="gray")
+        lines(c(X[loc],X[loc]),c(loc/n*S[n],S[loc]),col="red") #TODO
+      }else{
+        warning("Bridge statistic cannot be drawn because a non-standardized curve was requested")
+      }
+    }
+    else
+    {
+      lines(c(X[loc],X[loc]),c(0,S[loc]),col="red")
+    }
   }
 }

@@ -30,7 +30,7 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
   set.seed(seed)
   if(GRuse) GRconnect("GhostROC")
 
-  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.2p", "pval.1p", "pval.2pw", "pval.1pw")
+  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.2p", "pval.1p", "pval.2pb", "pval.1pb")
   out <- as.data.frame(matrix(NA, nrow =n_sim*length(sample_sizes)*length(b0s)*length(b1s), ncol = length(columns)))
   colnames(out) <- columns
 
@@ -78,11 +78,12 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
           out[index,"pval.LRT"]<-p.val.ab
           tmp <- logitgof(y, pi_star)
           out[index,"pval.HLT"]<-1-pchisq(tmp$statistic,10)
-          tmp <- cumulcalib(y, pi_star, method = c('twopart', 'twopartw', 'onepart', 'onepartw'), ordered = T)
-          out[index,"pval.2p"]<-tmp$pval
-          out[index,"pval.2pw"]<-tmp$details$twopartw$pval[1]
-          out[index,"pval.1p"]<-tmp$details$onepart$pval[1]
-          out[index,"pval.1pw"]<-tmp$details$onepartw$pval[1]
+          tmp <- cumulcalib(y, pi_star, ordered = T)
+          out[index,"pval.1p"]<-tmp$by_method$onepart$pval
+          out[index,"pval.2p"]<-tmp$by_method$twopart$pval
+          out[index,"pval.1pb"]<-tmp$by_method$`onepart-bridge`$pval
+          out[index,"pval.2pb"]<-tmp$by_method$`twopart-bridge`$pval
+
           index<-index+1
         }
       }
@@ -108,7 +109,7 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
 detailed_sim_power<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c(0,0.125,0.25), b1s=c(1/2,3/4,1,4/3,2), b2s=NULL, n_sim=1000, GRuse=FALSE, seed=1)
 {
   set.seed(seed)
-  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.2p", "pval.1p", "pval.2pw", "pval.1pw")
+  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.2p", "pval.1p", "pval.2pb", "pval.1pb")
   out <- as.data.frame(matrix(NA, nrow =n_sim*length(sample_sizes)*length(b0s)*length(b1s), ncol = length(columns)))
   colnames(out) <- columns
 
@@ -185,11 +186,11 @@ detailed_sim_power<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c(
             out[index,"pval.HLT"]<-1-pchisq(tmp$statistic,10)
 
             aux$stage <<- "cumulcalib"
-            tmp <- cumulcalib(y, pi_star, method = c('twopart', 'twopartw', 'onepart', 'onepartw'), ordered = T)
-            out[index,"pval.2p"]<-tmp$pval
-            out[index,"pval.2pw"]<-tmp$details$twopartw$pval[1]
-            out[index,"pval.1p"]<-tmp$details$onepart$pval[1]
-            out[index,"pval.1pw"]<-tmp$details$onepartw$pval[1]
+            tmp <- cumulcalib(y, pi_star, ordered = T)
+            out[index,"pval.1p"]<-tmp$by_method$onepart$pval
+            out[index,"pval.2p"]<-tmp$by_method$twopart$pval
+            out[index,"pval.1pb"]<-tmp$by_method$`onepart-bridge`$pval
+            out[index,"pval.2pb"]<-tmp$by_method$`twopart-bridge`$pval
 
             index<-index+1
           }
@@ -222,14 +223,14 @@ process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=
   for(i in l1_vals)
     for(j in l2_vals)
     {
-      str <- paste0("SELECT [",level3,"], AVG([pval.LRT]<0.05), AVG([pval.HLT]<0.05),  AVG([pval.2p]<0.05),  AVG([pval.2pw]<0.05),  AVG([pval.1p]<0.05),  AVG([pval.1pw]<0.05) FROM x WHERE ABS([",level1,"]-(",i,"))<",rounding_error," AND ABS([", level2,"]-(",j,"))<", rounding_error," GROUP BY [",level3,"]")
+      str <- paste0("SELECT [",level3,"], AVG([pval.LRT]<0.05), AVG([pval.HLT]<0.05), AVG([pval.1p]<0.05), AVG([pval.2p]<0.05), AVG([pval.2pb]<0.05) FROM x WHERE ABS([",level1,"]-(",i,"))<",rounding_error," AND ABS([", level2,"]-(",j,"))<", rounding_error," GROUP BY [",level3,"]")
       this_data <- sqldf(str)
-      my_palette <- c("#FFFFFF","#C0C0C0",  "#F17720", "blue", "green", "yellow")
+      my_palette <- c("#FFFFFF","#C0C0C0",  "#F17720", "red", 'blue')
       level3_values <- this_data[,1]
       values <- as.vector(rbind(t(this_data)[-1,],0))
       bp<-barplot(values,xaxt='n', yaxt='n', space=0, ylim=c(-0.25,1.6),col=c(my_palette,rgb(1,0,0)))
       text(x=0.4+c(0:17)*1,y=values+0.25,ifelse(values==0,"",round(values,2)),cex=1, srt=90)
-      text(x=c(1,5,10),y=-0.1,paste(level3_values),cex=1.5)
+      text(x=c(1, 7 ,13),y=-0.1,paste(level3_values),cex=1.5)
       text(x=5,y=1.5,paste0(" a=", fractions(i)," | b=", fractions(j)),cex=2,col="#600000")
     }
 }
@@ -240,9 +241,9 @@ process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=
 
 
 
-sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100,200), n_sim=10000)
+sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100, 250, 1000), n_sim=10000)
 {
-  columns <- c("i_sim","sample_size", "b0", "pval.1p", "pval.2p", "pval.1pw", "pval.2pw")
+  columns <- c("i_sim","sample_size", "b0", "pval.1p", "pval.2p", "pval.1pb", "pval.2pb")
   out<-as.data.frame(matrix(NA, nrow =n_sim*length(sample_sizes)*length(b0s),ncol=length(columns)))
   colnames(out) <- columns
 
@@ -261,12 +262,38 @@ sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100,200), n_sim=
         pi <- 1/(1+exp(-logit_pi))
         y=rbinom(sample_size,size = 1,prob = pi)
         #tmp1 <- cumulcalib(y, pi, ordered = T, n_sim=10000)
-        tmp <- cumulcalib(y, pi, method = c('twopart', 'twopartw', 'onepart', 'onepartw'), ordered = T)
+        tmp <- cumulcalib(y, pi, ordered = T)
 
-        out[index,] <- c(i,sample_size,b0,tmp$pval, tmp$details$twopartw$pval[1], tmp$details$onepart$pval[1], tmp$details$onepartw$pval[1])
+        out[index,] <- c(i,sample_size,b0, tmp$by_metho$onepart$pval, tmp$by_metho$twopart$pval, tmp$by_metho$`onepart-bridge`$pval, tmp$by_metho$`twopart-bridge`$pval)
         index <- index+1
       }
     }
+
   }
   out
+}
+
+
+
+process_sim_null_behavior <- function(x, val="pval.1p")
+{
+  require("sqldf")
+  l1_vals <- unique(x[,'sample_size'])
+  l2_vals <- unique(x[,'b0'])
+
+  par(mfrow=c(length(l1_vals),length(l2_vals)))
+  par(mar=0*c(1,1,1,1))
+
+  my_palette <- c("#FFFFFF","#C0C0C0",  "#F17720", "blue", "green", "yellow")
+
+  for(i in l1_vals)
+    for(j in l2_vals)
+    {
+      str <- paste0("SELECT [", val, "] FROM  x WHERE sample_size=", i," AND b0=" , j, "")
+      this_data <- sqldf(str)[[1]]
+      p <- mean(this_data<0.05)
+      hist(this_data, main="", axes=F, freq=F)
+      title(paste0("n=",i," | b0=",j),line = -1)
+      text(0.1,0.1,p)
+    }
 }
