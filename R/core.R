@@ -198,7 +198,7 @@ qMAD_BM_c <- function(q, w1)
 
 
 #' @export
-plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(p1=0.95,p2=0.95),cols=c(p1='blue',p2='red')), ...)
+plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red')), xaxes=c('time','preds') , ...)
 {
   args <- list(...)
   if(is.null(method))
@@ -256,11 +256,30 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   {
     args$type<-'l'
   }
+  i <- match("xaxt",names(args))
+  if(is.na(i))
+  {
+    args$xaxt<-'n'
+  }
 
   args$x<-t_
   args$y<-S
 
   do.call(plot, args)
+
+  #Axes
+  i <- match('time',xaxes)
+  if(!is.na(i))
+  {
+    axis(ifelse(i==1,1,3),at=(0:10)/10, labels = (0:10)/10)
+  }
+  i <- match('preds',xaxes)
+  if(!is.na(i))
+  {
+    xs <- round(unlist(lapply((0:10)/10, function (x) {cumulcalib_obj$data[which.min((cumulcalib_obj$data[,'t']-x)^2),'X']})),3)
+    axis(side=ifelse(i==1,1,3), at = (0:10)/10, labels = xs , padj = 1)
+  }
+
 
   lines(c(0,1),c(0,0),col="grey")
 

@@ -341,10 +341,10 @@ xs <- (1:3500)/1000
 cdf_a <- cdf_b1 <- cdf_b2 <- cdf_b3 <- cdf_c <- c(NA,lengths(xs))
 for(i in 1:length(xs))
 {
-  cdf_a[i] <- cumulcalib:::erdos(xs[i])
-  cdf_b1[i] <- cumulcalib:::pAbsuluteDistanceConditional(xs[i],0.5, method=1)
-  cdf_b2[i] <- cumulcalib:::pAbsuluteDistanceConditional(xs[i],1, method=1)
-  cdf_b3[i] <- cumulcalib:::pAbsuluteDistanceConditional(xs[i],1.5, method=1)
+  cdf_a[i] <- cumulcalib:::pMAD_BM(xs[i])
+  cdf_b1[i] <- cumulcalib:::pMAD_BM_c(xs[i],0.5, method=1)
+  cdf_b2[i] <- cumulcalib:::pMAD_BM_c(xs[i],1, method=1)
+  cdf_b3[i] <- cumulcalib:::pMAD_BM_c(xs[i],1.5, method=1)
   cdf_c[i] <- cumulcalib:::pKolmogorov(xs[i])
 }
 
@@ -356,23 +356,16 @@ y_b3 <- cdf_b3[-1]-cdf_b3[-length(cdf_b3)]
 y_c <- cdf_c[-1]-cdf_c[-length(cdf_c)]
 
 
-plot(xs, cdf_a[-length(cdf_a)], type='l', ylim=c(0,max(c(cdf_a[-length(cdf_a)],cdf_b1[-length(cdf_a)], cdf_b2[-length(cdf_a)], cdf_b3[-length(cdf_a)],cdf_c[-length(cdf_a)]))), lwd=2)
-cdf_b1[which(cdf_b1<=0)]<-NA
-lines(xs, cdf_b1[-length(cdf_a)], type='l', col='blue', lwd=1)
-cdf_b2[which(cdf_b2<=0)]<-NA
-lines(xs, cdf_b2[-length(cdf_a)], type='l', col='blue', lwd=1)
-cdf_b3[which(cdf_b3<=0)]<-NA
-lines(xs, cdf_b3, type='l', col='blue', lwd=1)
-lines(xs, cdf_c, type='l', col='red', lwd=2)
 
-
-
-plot(xs, y_a, type='l', ylim=c(0,max(c(y_a,y_b1, y_b2, y_b3,y_c))), lwd=2)
+plot(xs, y_a, type='l', ylim=c(0,max(c(y_a,y_c))), lwd=2, xlab="Statistic value", ylab="Density")
+t1 <- cumulcalib:::qMAD_BM(0.95)
+lines(c(t1,t1),c(0,1000),lty=3)
 y_b1[which(y_b1<=0)]<-NA
-lines(xs, y_b1, type='l', col='blue', lwd=1)
+#lines(xs, y_b1, type='l', col='blue', lwd=1)
 y_b2[which(y_b2<=0)]<-NA
-lines(xs, y_b2, type='l', col='blue', lwd=1)
+#lines(xs, y_b2, type='l', col='blue', lwd=1)
 y_b3[which(y_b3<=0)]<-NA
-lines(xs, y_b3, type='l', col='blue', lwd=1)
+#lines(xs, y_b3, type='l', col='blue', lwd=1)
 lines(xs, y_c, type='l', col='red', lwd=2)
-
+t2 <- cumulcalib:::qKolmogorov(0.95)
+lines(c(t2,t2),c(0,1000),col="red",lty=3)
