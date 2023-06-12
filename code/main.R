@@ -106,7 +106,7 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
 
 
 #X_dist:mean and SD of the distribution of the simple predictor. If NULL, then directly samples pi from standard uniform.
-detailed_sim_power<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c(0,0.125,0.25), b1s=c(1/2,3/4,1,4/3,2), b2s=NULL, n_sim=1000, GRuse=FALSE, seed=1)
+detailed_sim_power<-function(sample_sizes=c(100,250,500), X_dist=c(0,1), b0s=c(0,0.125,0.25), b1s=c(1/2,3/4,1,4/3,2), b2s=NULL, n_sim=1000, GRuse=FALSE, seed=1)
 {
   set.seed(seed)
   columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.2p", "pval.1p", "pval.2pb", "pval.1pb")
@@ -241,7 +241,7 @@ process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=
 
 
 
-sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100, 250, 1000), n_sim=10000)
+sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100, 250, 1000), n_sim=2500)
 {
   columns <- c("i_sim","sample_size", "b0", "pval.1p", "pval.2p", "pval.1pb", "pval.2pb")
   out<-as.data.frame(matrix(NA, nrow =n_sim*length(sample_sizes)*length(b0s),ncol=length(columns)))
@@ -275,25 +275,104 @@ sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100, 250, 1000),
 
 
 
-process_sim_null_behavior <- function(x, val="pval.1p")
+process_sim_null_behavior <- function(x, type="qq", val="pval.1p")
 {
   require("sqldf")
+
+
   l1_vals <- unique(x[,'sample_size'])
   l2_vals <- unique(x[,'b0'])
 
   par(mfrow=c(length(l1_vals),length(l2_vals)))
-  par(mar=0*c(1,1,1,1))
 
-  my_palette <- c("#FFFFFF","#C0C0C0",  "#F17720", "blue", "green", "yellow")
+  my_palette <- c("#F17720", "blue", "green", "red")
 
-  for(i in l1_vals)
-    for(j in l2_vals)
-    {
-      str <- paste0("SELECT [", val, "] FROM  x WHERE sample_size=", i," AND b0=" , j, "")
-      this_data <- sqldf(str)[[1]]
-      p <- mean(this_data<0.05)
-      hist(this_data, main="", axes=F, freq=F)
-      title(paste0("n=",i," | b0=",j),line = -1)
-      text(0.1,0.1,p)
-    }
+  if(type=="qq")
+  {
+    par(mar=0*c(2,2,2,2))
+
+    xs <- (0:100)/100
+
+    cols <- names(x)[which(substring(names(x),1,5)=="pval.")]
+    for(i in l1_vals)
+      for(j in l2_vals)
+        for(k in 1:length(cols))
+        {
+          str <- paste0("SELECT [", cols[k], "] FROM  x WHERE sample_size=", i," AND b0=" , j, "")
+          this_data <- sqldf(str)[[1]]
+          ys <- ecdf(this_data)(xs)
+          if(k==1)
+          {
+            plot(xs,ys,xlim=c(0,1),ylim=c(0,1),type='l',col=my_palette[k], lwd=2)
+            lines(c(0,1),c(0,1),col="gray")
+            title(paste0("n=",i," | b0=",j),line = -1)
+          }
+          else
+          {
+            lines(xs,ys,col=my_palette[k], lwd=2)
+          }
+          p <- mean(this_data<0.05)
+          text(0.1,0.7-k/10,paste0(cols[k],":",p))
+        }
+  }
+  else
+  {
+    par(mar=0*c(1,1,1,1))
+
+    for(i in l1_vals)
+      for(j in l2_vals)
+      {
+        str <- paste0("SELECT [", val, "] FROM  x WHERE sample_size=", i," AND b0=" , j, "")
+        this_data <- sqldf(str)[[1]]
+
+        p <- mean(this_data<0.05)
+        hist(this_data, main="", axes=F, freq=F)
+        title(paste0("n=",i," | b0=",j),line = -1)
+        text(0.1,0.1,p)
+
+        index <- index+1
+      }
+  }
 }
+
+
+
+xs <- (1:3500)/1000
+cdf_a <- cdf_b1 <- cdf_b2 <- cdf_b3 <- cdf_c <- c(NA,lengths(xs))
+for(i in 1:length(xs))
+{
+  cdf_a[i] <- cumulcalib:::erdos(xs[i])
+  cdf_b1[i] <- cumulcalib:::pAbsuluteDistanceConditional(xs[i],0.5, method=1)
+  cdf_b2[i] <- cumulcalib:::pAbsuluteDistanceConditional(xs[i],1, method=1)
+  cdf_b3[i] <- cumulcalib:::pAbsuluteDistanceConditional(xs[i],1.5, method=1)
+  cdf_c[i] <- cumulcalib:::pKolmogorov(xs[i])
+}
+
+y_a <- cdf_a[-1]-cdf_a[-length(cdf_a)]
+y_a[length(y_a)] <- 0
+y_b1 <- cdf_b1[-1]-cdf_b1[-length(cdf_b1)]
+y_b2 <- cdf_b2[-1]-cdf_b2[-length(cdf_b2)]
+y_b3 <- cdf_b3[-1]-cdf_b3[-length(cdf_b3)]
+y_c <- cdf_c[-1]-cdf_c[-length(cdf_c)]
+
+
+plot(xs, cdf_a[-length(cdf_a)], type='l', ylim=c(0,max(c(cdf_a[-length(cdf_a)],cdf_b1[-length(cdf_a)], cdf_b2[-length(cdf_a)], cdf_b3[-length(cdf_a)],cdf_c[-length(cdf_a)]))), lwd=2)
+cdf_b1[which(cdf_b1<=0)]<-NA
+lines(xs, cdf_b1[-length(cdf_a)], type='l', col='blue', lwd=1)
+cdf_b2[which(cdf_b2<=0)]<-NA
+lines(xs, cdf_b2[-length(cdf_a)], type='l', col='blue', lwd=1)
+cdf_b3[which(cdf_b3<=0)]<-NA
+lines(xs, cdf_b3, type='l', col='blue', lwd=1)
+lines(xs, cdf_c, type='l', col='red', lwd=2)
+
+
+
+plot(xs, y_a, type='l', ylim=c(0,max(c(y_a,y_b1, y_b2, y_b3,y_c))), lwd=2)
+y_b1[which(y_b1<=0)]<-NA
+lines(xs, y_b1, type='l', col='blue', lwd=1)
+y_b2[which(y_b2<=0)]<-NA
+lines(xs, y_b2, type='l', col='blue', lwd=1)
+y_b3[which(y_b3<=0)]<-NA
+lines(xs, y_b3, type='l', col='blue', lwd=1)
+lines(xs, y_c, type='l', col='red', lwd=2)
+

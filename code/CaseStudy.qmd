@@ -29,15 +29,16 @@ kable(rbind(
 #### Model 1 (small dev)
 
 ```{r}
-summary(model1)
+#summary(model1)
+round(coefficients(model1),3)
 
 ```
 
 #### Model 2 (full dev)
 
 ```{r}
-summary(model2)
-
+#summary(model2)
+round(coefficients(model2),3)
 ```
 
 ### AUCs
@@ -54,8 +55,14 @@ res22$auc
 
 ```{r}
 plot(res12$calib$calibration_plot)
-plot(res12$cumul_calib, standardize=F)
-res12$cumul_calib$details
+
+plot(res12$cumul_calib,method="CCI1p")
+summary(res12$cumul_calib,method="CCI1p")
+plot(res12$cumul_calib,method="CCI2p")
+summary(res12$cumul_calib,method="CCI2p")
+plot(res12$cumul_calib, method="BCI2p")
+summary(res12$cumul_calib, method="BCI2p")
+
 res12$HL
 ```
 
@@ -65,33 +72,15 @@ One-part test interpretation: Location was at index `r res12$cumul_calib$loc`, c
 
 ```{r}
 plot(res22$calib$calibration_plot)
-plot(res22$cumul_calib, standardize=F)
-res22$cumul_calib$details
+
+plot(res22$cumul_calib,method="CCI1p")
+summary(res22$cumul_calib,method="CCI1p")
+plot(res22$cumul_calib,method="CCI2p")
+summary(res22$cumul_calib,method="CCI2p")
+plot(res22$cumul_calib, method="BCI2p")
+summary(res22$cumul_calib, method="BCI2p")
+
 res22$HL
 ```
 
 One-part test interpretation: Location was at index `r res22$cumul_calib$loc`, corresponding to predicted value `r val_data2[res22$cumul_calib$loc,'pi2']` which is at `r round(100*res22$cumul_calib$loc/dim(val_data2)[1], 1)` percentile. Average bias on the left side: `r mean(val_data2$Y[1:res22$cumul_calib$loc])-mean(val_data2$pi2[1:res22$cumul_calib$loc])` and on the right-hand side: `r mean(val_data2$Y[-(1:res22$cumul_calib$loc)])-mean(val_data2$pi2[-(1:res22$cumul_calib$loc)])`
-
-### Extra stuff
-
-#### Small dev, small val (11)
-
-```{r}
-plot(res11$calib$calibration_plot)
-plot(res11$cumul_calib)
-res11$cumul_calib$details
-res11$HL
-```
-
-One-part test interpretation: Location was at index `r res11$cumul_calib$loc`, corresponding to predicted value `r val_data1[res11$cumul_calib$loc,'pi1']` which is at `r round(100*res11$cumul_calib$loc/dim(val_data1)[1], 1)` percentile.
-
-#### full dev, small val (21)
-
-```{r}
-plot(res21$calib$calibration_plot)
-plot(res21$cumul_calib)
-res21$cumul_calib$details
-res21$HL
-```
-
-One-part test interpretation: Location was at index `r res21$cumul_calib$loc`, corresponding to predicted value `r val_data1[res21$cumul_calib$loc,'pi2']` which is at `r round(100*res21$cumul_calib$loc/dim(val_data1)[1], 1)` percentile.

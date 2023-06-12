@@ -5,7 +5,7 @@ library(cumulcalib)
 library(voipred) #For GUSTO
 library(generalhoslem)
 
-set.seed(1)
+set.seed(111111) #31415926
 
 settings <- list(
   dev_sample_size1 = 500,
@@ -73,20 +73,20 @@ res11 <- res12 <- res21 <- res22 <-list()
 res12$auc <- roc(val_data2$Y, val_data2$pi1)$auc
 res22$auc <- roc(val_data2$Y, val_data2$pi2)$auc
 
-res11$calib <- predtools::calibration_plot(val_data1, obs="Y", pred="pi1")
+#res11$calib <- predtools::calibration_plot(val_data1, obs="Y", pred="pi1")
 res12$calib <- predtools::calibration_plot(val_data2, obs="Y", pred="pi1")
-res21$calib <- predtools::calibration_plot(val_data1, obs="Y", pred="pi2")
+#res21$calib <- predtools::calibration_plot(val_data1, obs="Y", pred="pi2")
 res22$calib <- predtools::calibration_plot(val_data2, obs="Y", pred="pi2")
 
-res11$cumul_calib <- cumulcalib::cumulcalib(val_data1$Y, val_data1$pi1)
+#res11$cumul_calib <- cumulcalib::cumulcalib(val_data1$Y, val_data1$pi1)
 res12$cumul_calib <- cumulcalib::cumulcalib(val_data2$Y, val_data2$pi1)
-res21$cumul_calib <- cumulcalib::cumulcalib(val_data1$Y, val_data1$pi2)
+#res21$cumul_calib <- cumulcalib::cumulcalib(val_data1$Y, val_data1$pi2)
 res22$cumul_calib <- cumulcalib::cumulcalib(val_data2$Y, val_data2$pi2)
 
 
-res11$HL <- generalhoslem::logitgof(val_data1$Y, val_data1$pi1)
+#res11$HL <- generalhoslem::logitgof(val_data1$Y, val_data1$pi1)
 res12$HL <- generalhoslem::logitgof(val_data2$Y, val_data2$pi1)
-res21$HL <- generalhoslem::logitgof(val_data1$Y, val_data1$pi2)
+#res21$HL <- generalhoslem::logitgof(val_data1$Y, val_data1$pi2)
 res22$HL <- generalhoslem::logitgof(val_data2$Y, val_data2$pi2)
 
 
