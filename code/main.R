@@ -30,7 +30,7 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
   set.seed(seed)
   if(GRuse) GRconnect("GhostROC")
 
-  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.2p", "pval.1p", "pval.2pb", "pval.1pb")
+  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.CCI1p", "pval.CCI2p", "pval.BCI2p")
   out <- as.data.frame(matrix(NA, nrow =n_sim*length(sample_sizes)*length(b0s)*length(b1s), ncol = length(columns)))
   colnames(out) <- columns
 
@@ -79,10 +79,9 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
           tmp <- logitgof(y, pi_star)
           out[index,"pval.HLT"]<-1-pchisq(tmp$statistic,10)
           tmp <- cumulcalib(y, pi_star, ordered = T)
-          out[index,"pval.1p"]<-tmp$by_method$onepart$pval
-          out[index,"pval.2p"]<-tmp$by_method$twopart$pval
-          out[index,"pval.1pb"]<-tmp$by_method$`onepart-bridge`$pval
-          out[index,"pval.2pb"]<-tmp$by_method$`twopart-bridge`$pval
+          out[index,"pval.CCI1p"]<-tmp$by_method$CCI1p$pval
+          out[index,"pval.CCI2p"]<-tmp$by_method$CCI2p$pval
+          out[index,"pval.BCI2p"]<-tmp$by_method$BCI2p$pval
 
           index<-index+1
         }
@@ -109,7 +108,7 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
 detailed_sim_power<-function(sample_sizes=c(100,250,500), X_dist=c(0,1), b0s=c(0,0.125,0.25), b1s=c(1/2,3/4,1,4/3,2), b2s=NULL, n_sim=1000, GRuse=FALSE, seed=1)
 {
   set.seed(seed)
-  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.2p", "pval.1p", "pval.2pb", "pval.1pb")
+  columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.CCI1p", "pval.CCI2p", "pval.BCI2p")
   out <- as.data.frame(matrix(NA, nrow =n_sim*length(sample_sizes)*length(b0s)*length(b1s), ncol = length(columns)))
   colnames(out) <- columns
 
@@ -187,10 +186,9 @@ detailed_sim_power<-function(sample_sizes=c(100,250,500), X_dist=c(0,1), b0s=c(0
 
             aux$stage <<- "cumulcalib"
             tmp <- cumulcalib(y, pi_star, ordered = T)
-            out[index,"pval.1p"]<-tmp$by_method$onepart$pval
-            out[index,"pval.2p"]<-tmp$by_method$twopart$pval
-            out[index,"pval.1pb"]<-tmp$by_method$`onepart-bridge`$pval
-            out[index,"pval.2pb"]<-tmp$by_method$`twopart-bridge`$pval
+            out[index,"pval.CCI1p"]<-tmp$by_method$CCI1p$pval
+            out[index,"pval.CCI2p"]<-tmp$by_method$CCI2p$pval
+            out[index,"pval.BCI2p"]<-tmp$by_method$BCI2p$pval
 
             index<-index+1
           }
@@ -223,9 +221,9 @@ process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=
   for(i in l1_vals)
     for(j in l2_vals)
     {
-      str <- paste0("SELECT [",level3,"], AVG([pval.LRT]<0.05), AVG([pval.HLT]<0.05), AVG([pval.1p]<0.05), AVG([pval.2p]<0.05), AVG([pval.2pb]<0.05) FROM x WHERE ABS([",level1,"]-(",i,"))<",rounding_error," AND ABS([", level2,"]-(",j,"))<", rounding_error," GROUP BY [",level3,"]")
+      str <- paste0("SELECT [",level3,"], AVG([pval.LRT]<0.05), AVG([pval.HLT]<0.05), AVG([pval.CCI1p]<0.05), AVG([pval.CCI2p]<0.05), AVG([pval.BCI2p]<0.05) FROM x WHERE ABS([",level1,"]-(",i,"))<",rounding_error," AND ABS([", level2,"]-(",j,"))<", rounding_error," GROUP BY [",level3,"]")
       this_data <- sqldf(str)
-      my_palette <- c("#FFFFFF","#C0C0C0",  "#F17720", "red", 'blue')
+      my_palette <- c("#FFFFFF","#C0C0C0",  "blue", "#F17720", "red")
       level3_values <- this_data[,1]
       values <- as.vector(rbind(t(this_data)[-1,],0))
       bp<-barplot(values,xaxt='n', yaxt='n', space=0, ylim=c(-0.25,1.6),col=c(my_palette,rgb(1,0,0)))
@@ -241,9 +239,9 @@ process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=
 
 
 
-sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100, 250, 1000), n_sim=2500)
+sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50, 100, 250, 1000), n_sim=10000)
 {
-  columns <- c("i_sim","sample_size", "b0", "pval.1p", "pval.2p", "pval.1pb", "pval.2pb")
+  columns <- c("i_sim","sample_size", "b0", "pval.CCI1p", "pval.CCI2p","pval.BCI2p")
   out<-as.data.frame(matrix(NA, nrow =n_sim*length(sample_sizes)*length(b0s),ncol=length(columns)))
   colnames(out) <- columns
 
@@ -264,7 +262,7 @@ sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100, 250, 1000),
         #tmp1 <- cumulcalib(y, pi, ordered = T, n_sim=10000)
         tmp <- cumulcalib(y, pi, ordered = T)
 
-        out[index,] <- c(i,sample_size,b0, tmp$by_metho$onepart$pval, tmp$by_metho$twopart$pval, tmp$by_metho$`onepart-bridge`$pval, tmp$by_metho$`twopart-bridge`$pval)
+        out[index,] <- c(i,sample_size,b0, tmp$by_metho$CCI1p$pval, tmp$by_metho$CCI2p$pval, tmp$by_method$BCI2p$pval)
         index <- index+1
       }
     }
@@ -275,7 +273,7 @@ sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50,100, 250, 1000),
 
 
 
-process_sim_null_behavior <- function(x, type="qq", val="pval.1p")
+process_sim_null_behavior <- function(x, type="qq", val=c('one-part'="pval.CCI1p",'two-part'="pval.BCI2p"))
 {
   require("sqldf")
 
@@ -285,20 +283,20 @@ process_sim_null_behavior <- function(x, type="qq", val="pval.1p")
 
   par(mfrow=c(length(l1_vals),length(l2_vals)))
 
-  my_palette <- c("#F17720", "blue", "green", "red")
+  my_palette <- c("black", "red")
 
   if(type=="qq")
   {
-    par(mar=0*c(2,2,2,2))
+    par(mar=c(1,1,1,1))
 
     xs <- (0:100)/100
 
-    cols <- names(x)[which(substring(names(x),1,5)=="pval.")]
+    #cols <- names(x)[which(substring(names(x),1,5)=="pval.")]
     for(i in l1_vals)
       for(j in l2_vals)
-        for(k in 1:length(cols))
+        for(k in 1:length(val))
         {
-          str <- paste0("SELECT [", cols[k], "] FROM  x WHERE sample_size=", i," AND b0=" , j, "")
+          str <- paste0("SELECT [", val[k], "] FROM  x WHERE sample_size=", i," AND b0=" , j, "")
           this_data <- sqldf(str)[[1]]
           ys <- ecdf(this_data)(xs)
           if(k==1)
@@ -312,7 +310,7 @@ process_sim_null_behavior <- function(x, type="qq", val="pval.1p")
             lines(xs,ys,col=my_palette[k], lwd=2)
           }
           p <- mean(this_data<0.05)
-          text(0.1,0.7-k/10,paste0(cols[k],":",p))
+          text(0.1,0.7-k/10,paste0(names(val)[k],":",p))
         }
   }
   else

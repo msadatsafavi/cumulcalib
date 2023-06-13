@@ -296,7 +296,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
     loc <- cumulcalib_obj$by_method[[method]]$loc
     if(method %in% c('BCI2p')) #If 2p bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
     {
-      lines(c(0,1),c(0,S[n]),col="gray")
+      lines(c(0,1),c(0,S[n]),col="gray", lty=3)
       lines(c(t_[loc],t_[loc]),c(t_[loc]/t_[n]*S[n],S[loc]),col=draw_stats$cols['p2'])
       lines(c(0,1),c(sign_p2*sig_p2,sign_p2*sig_p2+S[n]),col=draw_stats$cols['p2'],lty=2)
     }
