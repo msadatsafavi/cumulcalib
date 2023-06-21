@@ -283,7 +283,7 @@ process_sim_null_behavior <- function(x, type="qq", val=c('one-part'="pval.CCI1p
 
   par(mfrow=c(length(l1_vals),length(l2_vals)))
 
-  my_palette <- c("black", "red")
+  my_palette <- c("blue", "red")
 
   if(type=="qq")
   {

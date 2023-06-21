@@ -33,7 +33,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
         S2 <- S-S[n]*t/t[n]
         loc <- which.max(abs(S2))
         stat2 <- max(abs(S2))
-        pval2 <- 1-pKolmogorov(stat2)
+        pval2 <- 1-pKolmogorov(stat2, N=T_)
       }
       else
       {
@@ -59,7 +59,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
         S2 <- S- S[n]*t/t[n]
         loc <- which.max(abs(S2))
         stat <- max(abs(S2))
-        pval <- 1-pKolmogorov(stat)
+        pval <- 1-pKolmogorov(stat, N=T_)
         methods[[mt]]$stat <- stat
         methods[[mt]]$pval <- pval
         methods[[mt]]$loc <- loc
@@ -134,8 +134,10 @@ qMAD_BM <- function(q)
 
 
 #Taken from the CPAT package
-pKolmogorov <- function (q, summands = ceiling(q * sqrt(72) + 3/2))
+pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2), N=NULL)
 {
+  if(!is.null(N)) q <- q*(1+0.12/sqrt(N)+0.11/N)
+
   sqrt(2 * pi) * sapply(q, function(x) {
     if (x > 0) {
       sum(exp(-(2 * (1:summands) - 1)^2 * pi^2/(8 * x^2)))/x
@@ -145,6 +147,9 @@ pKolmogorov <- function (q, summands = ceiling(q * sqrt(72) + 3/2))
     }
   })
 }
+
+
+
 
 
 qKolmogorov <- function(q, summands = ceiling(q * sqrt(72) + 3/2))
