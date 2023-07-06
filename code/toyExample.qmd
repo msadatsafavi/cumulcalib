@@ -4,48 +4,64 @@ format: html
 editor: visual
 ---
 
-
-
 ```{r}
 library(cumulcalib)
 library(predtools)
 ```
 
-
 ```{r}
+set.seed(1)
+n <- 10000
+x_mu=0
+x_sd=1
 
-do <- function(n=2000,x_mu=-3,x_sd=1)
-{
-  out <- list()
-  
-  x <- rnorm(n,x_mu,x_sd)
-  p <- 1/(1+exp(-(x)))
-  pi <- p
-  pi2 <- 1/(1+exp(-(2*x+2)))
-  y <- rbinom(n,1,p)
-  
-  dt <- data.frame(pi=pi,pi2=pi2, p=p, y=y)
-  
-  out$cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
-  out$cal_pi2 <- predtools::calibration_plot(dt, obs="y", pred="pi2")
-  
-  out$ccal_pi <- cumulcalib::cumulcalib(y,pi, method="CCI1p")
-  out$ccal_pi2 <- cumulcalib::cumulcalib(y,pi2, method="CCI1p")
-  
-  loess.calibrate <- loess(y~pi)
-  P.calibrate <- predict(loess.calibrate, newdata=pi)
-  out$emax_pi <- max(abs(P.calibrate-pi))
-  loess.calibrate <- loess(y~pi2)
-  P.calibrate <- predict(loess.calibrate, newdata=pi2)
-  out$emax_pi2 <- max(abs(P.calibrate-pi2))
-  
-  out$data<-dt
-  
-  out
-}
+x <- rnorm(n,x_mu,x_sd)
+p <- 1/(1+exp(-(x)))
+y <- rbinom(n,1,p)
 
-
+dt <- data.frame(x=x, p=p, y=y)
 
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+### Calibrated
+
+```{r}
+dt$pi <- dt$p
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="CCI1p", draw_stats=NULL)
+```
+
+### Mean-miscliabrated
+
+```{r}
+dt$pi <- 1/(1+exp(-(0.1+log(dt$p/(1-dt$p)))))
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="CCI1p", draw_stats=NULL)
+```
+
+### Overfitted
+```{r}
+dt$pi <- 1/(1+exp(-(1.5*log(dt$p/(1-dt$p)))))
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="CCI1p", draw_stats=NULL) 
+```
+
+
+
+
+
+### mean-miscalibrated and overfitted
+```{r}
+dt$pi <- 1/(1+exp(-(0.1+1.5*log(dt$p/(1-dt$p)))))
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="CCI1p", draw_stats=NULL) 
+```
+

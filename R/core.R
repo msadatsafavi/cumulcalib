@@ -203,7 +203,7 @@ qMAD_BM_c <- function(q, w1)
 
 
 #' @export
-plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red')), xaxes=c('time','preds') , ...)
+plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red')), xaxes=c('t','pi') , ...)
 {
   args <- list(...)
   if(is.null(method))
@@ -224,7 +224,6 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   {
     S<-S-t_*S[n]
   }
-
 
 
   sig_p1 <- sig_p2 <- 0 #0 indicates do not draw
@@ -254,7 +253,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   i <- match("ylim",names(args))
   if(is.na(i))
   {
-    args$ylim<-c(min(S,-sig_p1*(sign_p1==-1),-sig_p2*(sign_p2==-1)),max(S,sig_p1*(sign_p1==1),sig_p2*(sign_p2==1)))
+    args$ylim<-c(min(S,-sig_p1*(sign_p1==-1),-sig_p2*(sign_p2==-1),-1),max(S,sig_p1*(sign_p1==1),sig_p2*(sign_p2==1),1))
   }
   i <- match("type",names(args))
   if(is.na(i))
@@ -266,37 +265,58 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   {
     args$xaxt<-'n'
   }
+  i <- match("yaxt",names(args))
+  if(is.na(i))
+  {
+    args$yaxt<-'n'
+  }
 
   args$x<-t_
   args$y<-S
 
+  args$xlab<-""
+  args$ylab<-"S"
+
   do.call(plot, args)
 
   #Axes
-  i <- match('time',xaxes)
+  i <- match('t',xaxes)
   if(!is.na(i))
   {
-    axis(ifelse(i==1,1,3),at=(0:10)/10, labels = (0:10)/10)
+    side<-ifelse(i==1,1,3)
+    axis(side,at=(0:10)/10, labels=(0:10)/10)
+    mtext('t',side, line=2)
   }
-  i <- match('preds',xaxes)
+  i <- match('pi',xaxes)
   if(!is.na(i))
   {
+    side<-ifelse(i==1,1,3)
     xs <- round(unlist(lapply((0:10)/10, function (x) {cumulcalib_obj$data[which.min((cumulcalib_obj$data[,'t']-x)^2),'X']})),3)
-    axis(side=ifelse(i==1,1,3), at = (0:10)/10, labels = xs , padj = 1)
+    axis(side=side, at = (0:10)/10, labels=xs , padj = 1)
+    mtext(expression(pi),side,line=2)
   }
 
+  par(new = TRUE)
+  plot(t_, S, xlim=args$xlim, ylim=args$ylim,  type = "l", axes = F, bty = "n", xlab = "", ylab = "")
+  axis(side=2, at=pretty(args$ylim))
+  axis(side=4, at=pretty(args$ylim), labels=round(pretty(args$ylim)*sqrt(sum(t_))/n,2))
 
   lines(c(0,1),c(0,0),col="grey")
 
+  #Triangle
+  {
+    polygon(x=c(0,-0.1,-0.1), y=c(0,-1,1), col = 'black')
+  }
+
   #P1 lines
-  if(method %in% c("CCI2p","BCI2p") && !is.na(draw_stats$cols['p1']))
+  if(method %in% c("CCI2p","BCI2p") && !is.null(draw_stats$cols['p1']))
   {
     lines(c(1,1),c(0,S[n]), col=draw_stats$cols['p1'])
     lines(c(0,1),c(sign_p1*sig_p1,sign_p1*sig_p1),col=draw_stats$cols['p1'],lty=2)
   }
 
   #P2 lines
-  if(!is.na(draw_stats$cols['p2']))
+  if(!is.null(draw_stats$cols['p2']))
   {
     loc <- cumulcalib_obj$by_method[[method]]$loc
     if(method %in% c('BCI2p')) #If 2p bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
