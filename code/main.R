@@ -25,7 +25,7 @@ aux <- list()
 
 
 
-detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c(-0.25,-0.125,0,0.125,0.25),b1s=c(0.5,0.75,1,1.5,2),n_sim=1000, GRuse=FALSE, seed=1)
+detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c(-0.25,-0.125,0,0.125,0.25),b1s=c(0.5,0.75,1,1.5,2),n_sim=2500, GRuse=FALSE, seed=1)
 {
   set.seed(seed)
   if(GRuse) GRconnect("GhostROC")
@@ -105,7 +105,7 @@ detailed_sim_linear<-function(sample_sizes=c(100,250,1000), X_dist=c(0,1), b0s=c
 
 
 #X_dist:mean and SD of the distribution of the simple predictor. If NULL, then directly samples pi from standard uniform.
-detailed_sim_power<-function(sample_sizes=c(100,250,500), X_dist=c(0,1), b0s=c(0,0.125,0.25), b1s=c(1/2,3/4,1,4/3,2), b2s=NULL, n_sim=1000, GRuse=FALSE, seed=1)
+detailed_sim_power<-function(sample_sizes=c(100,250,500), X_dist=c(0,1), b0s=c(0,0.125,0.25), b1s=c(1/2,3/4,1,4/3,2), b2s=NULL, n_sim=2500, GRuse=FALSE, seed=1)
 {
   set.seed(seed)
   columns <- c("i_sim","sample_size", "b0", "b1", "pval.HLT","pval.LRT", "pval.CCI1p", "pval.CCI2p", "pval.BCI2p")
@@ -221,15 +221,15 @@ process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=
   for(i in l1_vals)
     for(j in l2_vals)
     {
-      str <- paste0("SELECT [",level3,"], AVG([pval.LRT]<0.05), AVG([pval.HLT]<0.05), AVG([pval.CCI1p]<0.05), AVG([pval.CCI2p]<0.05), AVG([pval.BCI2p]<0.05) FROM x WHERE ABS([",level1,"]-(",i,"))<",rounding_error," AND ABS([", level2,"]-(",j,"))<", rounding_error," GROUP BY [",level3,"]")
+      str <- paste0("SELECT [",level3,"], AVG([pval.LRT]<0.05), AVG([pval.HLT]<0.05), AVG([pval.CCI1p]<0.05), AVG([pval.BCI2p]<0.05) FROM x WHERE ABS([",level1,"]-(",i,"))<",rounding_error," AND ABS([", level2,"]-(",j,"))<", rounding_error," GROUP BY [",level3,"]")
       this_data <- sqldf(str)
-      my_palette <- c("#FFFFFF","#C0C0C0",  "blue", "#F17720", "red")
+      my_palette <- c("#FFFFFF","#C0C0C0",  "blue", "#F17720")
       level3_values <- this_data[,1]
       values <- as.vector(rbind(t(this_data)[-1,],0))
       bp<-barplot(values,xaxt='n', yaxt='n', space=0, ylim=c(-0.25,1.6),col=c(my_palette,rgb(1,0,0)))
       text(x=0.4+c(0:17)*1,y=values+0.25,ifelse(values==0,"",round(values,2)),cex=1, srt=90)
-      text(x=c(1, 7 ,13),y=-0.1,paste(level3_values),cex=1.5)
-      text(x=5,y=1.5,paste0(" a=", fractions(i)," | b=", fractions(j)),cex=2,col="#600000")
+      text(x=c(1, 7 ,12),y=-0.1,paste(level3_values),cex=1.5)
+      text(x=5,y=1.5,paste0(" a=", fractions(i)," | b=", fractions(j)),cex=1.5,col="#600000")
     }
 }
 
@@ -283,7 +283,7 @@ process_sim_null_behavior <- function(x, type="qq", val=c('one-part'="pval.CCI1p
 
   par(mfrow=c(length(l1_vals),length(l2_vals)))
 
-  my_palette <- c("blue", "red")
+  my_palette <- c("blue", "#F17720")
 
   if(type=="qq")
   {
@@ -309,8 +309,8 @@ process_sim_null_behavior <- function(x, type="qq", val=c('one-part'="pval.CCI1p
           {
             lines(xs,ys,col=my_palette[k], lwd=2)
           }
-          p <- mean(this_data<0.05)
-          text(0.1,0.7-k/10,paste0(names(val)[k],":",p))
+          p <- round(mean(this_data<0.05),digits = 3)
+          text(0.2,0.7-k/10,paste0(names(val)[k],":",p))
         }
   }
   else
@@ -355,15 +355,17 @@ y_c <- cdf_c[-1]-cdf_c[-length(cdf_c)]
 
 
 
-plot(xs, y_a, type='l', ylim=c(0,max(c(y_a,y_c))), lwd=2, xlab="Statistic value", ylab="Density")
-t1 <- cumulcalib:::qMAD_BM(0.95)
-lines(c(t1,t1),c(0,1000),lty=3)
+plot(xs, y_a, type='l', ylim=c(0,max(c(y_a,y_c))), lwd=2, xlab="Statistic value", ylab="Density", col="blue")
+# t1 <- cumulcalib:::qMAD_BM(0.95)
+# lines(c(t1,t1),c(0,1000),lty=3, col="blue")
+# t1 <- cumulcalib:::qMAD_BM(0.5)
+# lines(c(t1,t1),c(0,1000),lty=3, col="blue")
 y_b1[which(y_b1<=0)]<-NA
 #lines(xs, y_b1, type='l', col='blue', lwd=1)
 y_b2[which(y_b2<=0)]<-NA
 #lines(xs, y_b2, type='l', col='blue', lwd=1)
 y_b3[which(y_b3<=0)]<-NA
 #lines(xs, y_b3, type='l', col='blue', lwd=1)
-lines(xs, y_c, type='l', col='red', lwd=2)
-t2 <- cumulcalib:::qKolmogorov(0.95)
-lines(c(t2,t2),c(0,1000),col="red",lty=3)
+lines(xs, y_c, type='l', col='#F17720', lwd=2)
+#t2 <- cumulcalib:::qKolmogorov(0.95)
+#lines(c(t2,t2),c(0,1000),col="red",lty=3)

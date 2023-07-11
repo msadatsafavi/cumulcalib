@@ -248,7 +248,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   i <- match("xlim",names(args))
   if(is.na(i))
   {
-    args$xlim<-c(0,1)
+    args$xlim<-c(-0.03,1.01)
   }
   i <- match("ylim",names(args))
   if(is.na(i))
@@ -277,6 +277,8 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   args$xlab<-""
   args$ylab<-"S"
 
+  args$xaxs<-'i'
+
   do.call(plot, args)
 
   #Axes
@@ -296,16 +298,16 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
     mtext(expression(pi),side,line=2)
   }
 
-  par(new = TRUE)
-  plot(t_, S, xlim=args$xlim, ylim=args$ylim,  type = "l", axes = F, bty = "n", xlab = "", ylab = "")
+  #par(new = TRUE)
+  #plot(t_, S, xlim=args$xlim, ylim=args$ylim,  type = "l", axes = F, bty = "n", xlab = "", ylab = "", xaxs='i')
   axis(side=2, at=pretty(args$ylim))
-  axis(side=4, at=pretty(args$ylim), labels=round(pretty(args$ylim)*sqrt(sum(t_))/n,2))
+  #axis(side=4, at=pretty(args$ylim), labels=round(pretty(args$ylim)*sqrt(sum(t_))/n,2))
 
   lines(c(0,1),c(0,0),col="grey")
 
   #Triangle
   {
-    polygon(x=c(0,-0.1,-0.1), y=c(0,-1,1), col = 'black')
+    polygon(x=c(0,-0.03,-0.03), y=c(0,-1,1), col = 'black')
   }
 
   #P1 lines
