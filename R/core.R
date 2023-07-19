@@ -33,7 +33,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
         S2 <- S-S[n]*t/t[n]
         loc <- which.max(abs(S2))
         stat2 <- max(abs(S2))
-        pval2 <- 1-pKolmogorov(stat2, N=T_)
+        pval2 <- 1-pKolmogorov(stat2)
       }
       else
       {
@@ -48,7 +48,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
       methods[[mt]]$stat <- fisher
       methods[[mt]]$pval <- pval
       methods[[mt]]$stat_by_component <- c(mean=stat1, distance=stat2)
-      methods[[mt]]$pval_by_component <- c(mean=pval1, distnce=pval2)
+      methods[[mt]]$pval_by_component <- c(mean=pval1, distance=pval2)
       methods[[mt]]$loc <- loc
     }
 
@@ -59,7 +59,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
         S2 <- S- S[n]*t/t[n]
         loc <- which.max(abs(S2))
         stat <- max(abs(S2))
-        pval <- 1-pKolmogorov(stat, N=T_)
+        pval <- 1-pKolmogorov(stat)
         methods[[mt]]$stat <- stat
         methods[[mt]]$pval <- pval
         methods[[mt]]$loc <- loc
@@ -323,7 +323,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
     loc <- cumulcalib_obj$by_method[[method]]$loc
     if(method %in% c('BCI2p')) #If 2p bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
     {
-      lines(c(0,1),c(0,S[n]),col="gray", lty=3)
+      lines(c(0,1),c(0,S[n]),col="gray", lty=2)
       lines(c(t_[loc],t_[loc]),c(t_[loc]/t_[n]*S[n],S[loc]),col=draw_stats$cols['p2'])
       lines(c(0,1),c(sign_p2*sig_p2,sign_p2*sig_p2+S[n]),col=draw_stats$cols['p2'],lty=2)
     }
@@ -340,6 +340,18 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
     }
   }
 }
+
+
+
+
+pKolmogorov2 <- function(x, n=100)
+{
+  d <- x/sqrt(n)
+  X <- seq(from=0, to=1-d, length.out=n)
+  1-ks.test(X,punif, exact=F)$p.value
+}
+
+
 
 
 #' @export

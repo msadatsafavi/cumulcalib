@@ -58,8 +58,6 @@ plot(res12$calib$calibration_plot)
 
 plot(res12$cumul_calib,method="CCI1p")
 summary(res12$cumul_calib,method="CCI1p")
-plot(res12$cumul_calib,method="CCI2p")
-summary(res12$cumul_calib,method="CCI2p")
 plot(res12$cumul_calib, method="BCI2p")
 summary(res12$cumul_calib, method="BCI2p")
 
@@ -75,8 +73,6 @@ plot(res22$calib$calibration_plot)
 
 plot(res22$cumul_calib,method="CCI1p")
 summary(res22$cumul_calib,method="CCI1p")
-plot(res22$cumul_calib,method="CCI2p")
-summary(res22$cumul_calib,method="CCI2p")
 plot(res22$cumul_calib, method="BCI2p")
 summary(res22$cumul_calib, method="BCI2p")
 

@@ -273,7 +273,7 @@ sim_null_behavior <- function(b0s=c(-2,-1,0), sample_sizes=c(50, 100, 250, 1000)
 
 
 
-process_sim_null_behavior <- function(x, type="qq", val=c('one-part'="pval.CCI1p",'two-part'="pval.BCI2p"))
+process_sim_null_behavior <- function(x, type="qq", val=c('BM'="pval.CCI1p",'BB'="pval.BCI2p"))
 {
   require("sqldf")
 
