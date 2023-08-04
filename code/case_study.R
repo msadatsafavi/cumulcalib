@@ -70,6 +70,9 @@ val_data2$pi2 <- predict(model2, type="response", newdata=val_data2)
 
 res11 <- res12 <- res21 <- res22 <-list()
 
+res12$coeffs <- coefficients(model1)
+res22$coeffs <- coefficients(model2)
+
 res12$auc <- roc(val_data2$Y, val_data2$pi1)$auc
 res22$auc <- roc(val_data2$Y, val_data2$pi2)$auc
 
@@ -140,4 +143,7 @@ sim_case_study <- function(models=c(1,2), val_sample_sizes=c(500, 1000, 2000, 40
 
   out
 }
+
+saveRDS(list(res_small=res12,res_full=res22),"case_study.RDS")
+
 

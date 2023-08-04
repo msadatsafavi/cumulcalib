@@ -44,6 +44,7 @@ plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="CCI1p", draw_stats=NULL)
 ```
 
 ### Overfitted
+
 ```{r}
 dt$pi <- 1/(1+exp(-(1.5*log(dt$p/(1-dt$p)))))
 cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
@@ -52,11 +53,8 @@ cal_pi
 plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="CCI1p", draw_stats=NULL) 
 ```
 
-
-
-
-
 ### mean-miscalibrated and overfitted
+
 ```{r}
 dt$pi <- 1/(1+exp(-(0.1+1.5*log(dt$p/(1-dt$p)))))
 cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
@@ -64,4 +62,3 @@ cal_pi
 
 plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="CCI1p", draw_stats=NULL) 
 ```
-

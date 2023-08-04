@@ -17,7 +17,16 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
   T_ <- sum(p*(1-p)) #Total 'time'
   t <- cumsum(p*(1-p))/T_
   X <- p
-  S <- cumsum(y-p)/sqrt(T_)
+
+  C <- cumsum(y-p)/n
+  C_n <- C[n]
+  C_star <- max(abs(C))
+  B_star <- max(abs(C-C[n]*t/t[n]))
+
+  scale <- n/sqrt(T_)
+  S <- scale*C
+  S_star <- scale*C_star
+  S_n <- scale*C_n
 
   for(i in 1:length(method))
   {
@@ -56,7 +65,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
     {
       if(mt=='BCI1p')
       {
-        S2 <- S- S[n]*t/t[n]
+        S2 <- S-S[n]*t/t[n]
         loc <- which.max(abs(S2))
         stat <- max(abs(S2))
         pval <- 1-pKolmogorov(stat)
@@ -76,8 +85,16 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
     }
   }
 
-  out$data <- cbind(X=X,t=t,S=S)
+  out$data <- cbind(X=X,t=t,C=C, S=S)
   out$method <- names(methods[1])
+
+  out$scale <- scale
+  out$C_n <- C_n
+  out$S_n <- S_n
+  out$C_star <- C_star
+  out$S_star <- S_star
+  out$B_star <- B_star
+
   #Copy the first method results to root of the list
   for(nm in names(methods[[1]]))
   {
@@ -203,7 +220,7 @@ qMAD_BM_c <- function(q, w1)
 
 
 #' @export
-plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red')), xaxes=c('t','pi') , ...)
+plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_stats=list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red')), xaxes=c('t','pi') , ...)
 {
   args <- list(...)
   if(is.null(method))
@@ -211,37 +228,46 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
     method <- cumulcalib_obj$method
   }
 
-
-  S <- cumulcalib_obj$data[,'S']
   t_ <- cumulcalib_obj$data[,'t']
   X <- cumulcalib_obj$data[,'X']
-  n <- length(S)
 
-  sign_p1 <- sign(S[n])
-  sign_p2 <- sign(S[cumulcalib_obj$by_method[[method]]$loc])
+  if(standardized)
+  {
+    W <- cumulcalib_obj$data[,'C']*cumulcalib_obj$scale
+    scale <- 1
+  }
+  else
+  {
+    W <- cumulcalib_obj$data[,'C']
+    scale <- 1/cumulcalib_obj$scale
+  }
+
+  n <- length(W)
+
+  sign_p1 <- sign(W[n])
+  sign_p2 <- sign(W[cumulcalib_obj$by_method[[method]]$loc])
 
   if(method=="BCI1p") #The only method that messes with S when drawing it.
   {
-    S<-S-t_*S[n]
+    W<-W-t_*W[n]
   }
-
 
   sig_p1 <- sig_p2 <- 0 #0 indicates do not draw
   if(!is.null(draw_stats))
   {
-    sig_p1 <- qnorm(1-(1-draw_stats$sigs['p1'])/2)
+    sig_p1 <- scale*qnorm(1-(1-draw_stats$sigs['p1'])/2)
 
     if(method %in% c("CCI1p"))
     {
-      sig_p2 <- qMAD_BM(draw_stats$sigs['p2'])
+      sig_p2 <- scale*qMAD_BM(draw_stats$sigs['p2'])
     }
     if(method %in% c("CCI2p"))
     {
-      sig_p2 <- qMAD_BM_c(draw_stats$sigs['p2'],w1=unname(cumulcalib_obj$by_method$CCI2p$stat_by_component['mean']))
+      sig_p2 <- scale*qMAD_BM_c(draw_stats$sigs['p2'],w1=unname(cumulcalib_obj$by_method$CCI2p$stat_by_component['mean']))
     }
     if(method %in% c("BCI1p","BCI2p"))
     {
-      sig_p2 <- qKolmogorov(draw_stats$sigs['p2'])
+      sig_p2 <- scale*qKolmogorov(draw_stats$sigs['p2'])
     }
   }
 
@@ -253,7 +279,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   i <- match("ylim",names(args))
   if(is.na(i))
   {
-    args$ylim<-c(min(S,-sig_p1*(sign_p1==-1),-sig_p2*(sign_p2==-1),-1),max(S,sig_p1*(sign_p1==1),sig_p2*(sign_p2==1),1))
+    args$ylim<- c(min(W,-sig_p1*(sign_p1==-1),-sig_p2*(sign_p2==-1),-scale),max(W,sig_p1*(sign_p1==1),sig_p2*(sign_p2==1),scale))
   }
   i <- match("type",names(args))
   if(is.na(i))
@@ -272,10 +298,10 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
   }
 
   args$x<-t_
-  args$y<-S
+  args$y<-W
 
   args$xlab<-""
-  args$ylab<-"S"
+  args$ylab<-ifelse(standardized,"Standardized cumulative sum", "Scaled cumulative sum")
 
   args$xaxs<-'i'
 
@@ -298,22 +324,19 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
     mtext(expression(pi),side,line=2)
   }
 
-  #par(new = TRUE)
-  #plot(t_, S, xlim=args$xlim, ylim=args$ylim,  type = "l", axes = F, bty = "n", xlab = "", ylab = "", xaxs='i')
   axis(side=2, at=pretty(args$ylim))
-  #axis(side=4, at=pretty(args$ylim), labels=round(pretty(args$ylim)*sqrt(sum(t_))/n,2))
 
   lines(c(0,1),c(0,0),col="grey")
 
   #Triangle
   {
-    polygon(x=c(0,-0.03,-0.03), y=c(0,-1,1), col = 'black')
+    polygon(x=c(0,-0.03,-0.03), y=c(0,-1,1)*scale, col = 'black')
   }
 
   #P1 lines
   if(method %in% c("CCI2p","BCI2p") && !is.null(draw_stats$cols['p1']))
   {
-    lines(c(1,1),c(0,S[n]), col=draw_stats$cols['p1'])
+    lines(c(1,1),c(0,W[n]), col=draw_stats$cols['p1'])
     lines(c(0,1),c(sign_p1*sig_p1,sign_p1*sig_p1),col=draw_stats$cols['p1'],lty=2)
   }
 
@@ -323,19 +346,19 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(
     loc <- cumulcalib_obj$by_method[[method]]$loc
     if(method %in% c('BCI2p')) #If 2p bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
     {
-      lines(c(0,1),c(0,S[n]),col="gray", lty=2)
-      lines(c(t_[loc],t_[loc]),c(t_[loc]/t_[n]*S[n],S[loc]),col=draw_stats$cols['p2'])
-      lines(c(0,1),c(sign_p2*sig_p2,sign_p2*sig_p2+S[n]),col=draw_stats$cols['p2'],lty=2)
+      lines(c(0,1),c(0,W[n]),col="gray", lty=2)
+      lines(c(t_[loc],t_[loc]),c(t_[loc]/t_[n]*W[n],W[loc]),col=draw_stats$cols['p2'])
+      lines(c(0,1),c(sign_p2*sig_p2,sign_p2*sig_p2+W[n]),col=draw_stats$cols['p2'],lty=2)
     }
     else if(method %in% c('BCI1p'))
     {
-      lines(c(0,1),c(0,S[n]),col="gray")
-      lines(c(t_[loc],t_[loc]),c(0,S[loc]),col=draw_stats$cols['p2'])
+      lines(c(0,1),c(0,W[n]),col="gray")
+      lines(c(t_[loc],t_[loc]),c(0,W[loc]),col=draw_stats$cols['p2'])
       lines(c(0,1),c(sign_p2*sig_p2,sign_p2*sig_p2),col=draw_stats$cols['p2'],lty=2)
     }
     else
     {
-      lines(c(t_[loc],t_[loc]),c(0,S[loc]),col=draw_stats$cols['p2'])
+      lines(c(t_[loc],t_[loc]),c(0,W[loc]),col=draw_stats$cols['p2'])
       lines(c(0,1),c(sign_p2*sig_p2,sign_p2*sig_p2),col=draw_stats$cols['p2'],lty=2)
     }
   }
