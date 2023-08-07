@@ -4,7 +4,8 @@ format: html
 editor: visual
 ---
 
-## Cast Study (GUSTI-I)
+## Cast Study (GUSTO-I)
+## 2023.08.07
 
 ## Running Code
 

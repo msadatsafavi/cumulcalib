@@ -94,8 +94,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<section id="cast-study-gusti-i" class="level2">
-<h2 class="anchored" data-anchor-id="cast-study-gusti-i">Cast Study (GUSTI-I)</h2>
+<section id="cast-study-gusto-i" class="level2">
+<h2 class="anchored" data-anchor-id="cast-study-gusto-i">Cast Study (GUSTO-I)</h2>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section">2023.08.07</h2>
 </section>
 <section id="running-code" class="level2">
 <h2 class="anchored" data-anchor-id="running-code">Running Code</h2>
@@ -208,7 +211,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res12<span class="sc">$</span>cumul_calib,<span class="at">method=</span><span class="st">"CCI1p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Method: One-part Brownian Motion (CCI1p)"
+<pre><code>[1] "C_n: -0.00104175180593466"
+[1] "S_n: -0.695004245405753"
+[1] "C_star: 0.00421961645987526"
+[1] "S_star: 2.81511520967906"
+[1] "B_star: 3.33806872142875"
+[1] "Method: One-part Brownian Motion (CCI1p)"
 [1] "Test statistic value: 2.81511520967906"
 [1] "P-value: 0.00975195002512996"
 [1] "Location of maximum drift: 21623  | time value: 0.752446499725159  | predictor value: 0.231769680615466"</code></pre>
@@ -219,7 +227,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res12<span class="sc">$</span>cumul_calib, <span class="at">method=</span><span class="st">"BCI2p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Method: Two-part Brownian Bridge (BCI2p)"
+<pre><code>[1] "C_n: -0.00104175180593466"
+[1] "S_n: -0.695004245405753"
+[1] "C_star: 0.00421961645987526"
+[1] "S_star: 2.81511520967906"
+[1] "B_star: 3.33806872142875"
+[1] "Method: Two-part Brownian Bridge (BCI2p)"
 [1] "Test statistic values:"
       mean   distance 
 -0.6950042  3.3380687 
@@ -254,7 +267,12 @@ X-squared = 47.141, df = 8, p-value = 1.441e-07</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res22<span class="sc">$</span>cumul_calib,<span class="at">method=</span><span class="st">"CCI1p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Method: One-part Brownian Motion (CCI1p)"
+<pre><code>[1] "C_n: -0.00156276638623431"
+[1] "S_n: -1.00908104947688"
+[1] "C_star: 0.00200906446334091"
+[1] "S_star: 1.29725651574821"
+[1] "B_star: 1.02844827843829"
+[1] "Method: One-part Brownian Motion (CCI1p)"
 [1] "Test statistic value: 1.29725651574821"
 [1] "P-value: 0.388886850369115"
 [1] "Location of maximum drift: 15245  | time value: 0.287796643081862  | predictor value: 0.0603447711748226"</code></pre>
@@ -265,7 +283,12 @@ X-squared = 47.141, df = 8, p-value = 1.441e-07</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res22<span class="sc">$</span>cumul_calib, <span class="at">method=</span><span class="st">"BCI2p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Method: Two-part Brownian Bridge (BCI2p)"
+<pre><code>[1] "C_n: -0.00156276638623431"
+[1] "S_n: -1.00908104947688"
+[1] "C_star: 0.00200906446334091"
+[1] "S_star: 1.29725651574821"
+[1] "B_star: 1.02844827843829"
+[1] "Method: Two-part Brownian Bridge (BCI2p)"
 [1] "Test statistic values:"
      mean  distance 
 -1.009081  1.028448 

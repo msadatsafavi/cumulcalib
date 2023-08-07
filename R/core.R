@@ -21,11 +21,11 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
   C <- cumsum(y-p)/n
   C_n <- C[n]
   C_star <- max(abs(C))
-  B_star <- max(abs(C-C[n]*t/t[n]))
 
   scale <- n/sqrt(T_)
   S <- scale*C
   S_star <- scale*C_star
+  B_star <- max(abs(S-S[n]*t))
   S_n <- scale*C_n
 
   for(i in 1:length(method))
@@ -65,7 +65,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
     {
       if(mt=='BCI1p')
       {
-        S2 <- S-S[n]*t/t[n]
+        S2 <- S-S[n]*t
         loc <- which.max(abs(S2))
         stat <- max(abs(S2))
         pval <- 1-pKolmogorov(stat)
@@ -386,6 +386,11 @@ summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
   }
 
   n <- dim(cumulcalib_obj$data)[1]
+  print(paste("C_n:",cumulcalib_obj$C_n))
+  print(paste("S_n:",cumulcalib_obj$S_n))
+  print(paste("C_star:",cumulcalib_obj$C_star))
+  print(paste("S_star:",cumulcalib_obj$S_star))
+  print(paste("B_star:",cumulcalib_obj$B_star))
 
   if(method=="CCI1p")
   {
