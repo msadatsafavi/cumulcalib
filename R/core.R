@@ -1,5 +1,5 @@
 #' @export
-cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=F, n_sim=0)
+cumulcalib <- function(y, p, method=c('BB','BM2p','BM'), ordered=F, n_sim=0)
 {
   out <- list()
 
@@ -32,12 +32,12 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
   {
     mt <- method[i]
 
-    if(mt %in% c('CCI2p','BCI2p'))
+    if(mt %in% c('BM2p','BB'))
     {
       stat1 <- S[n]
       pval1 <- 2*pnorm(-abs(S[n]),0,1) #Two-sided z test
 
-      if(mt=='BCI2p')
+      if(mt=='BB')
       {
         S2 <- S-S[n]*t/t[n]
         loc <- which.max(abs(S2))
@@ -61,7 +61,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
       methods[[mt]]$loc <- loc
     }
 
-    if(mt %in% c('CCI1p','BCI1p'))
+    if(mt %in% c('BM','BCI1p'))
     {
       if(mt=='BCI1p')
       {
@@ -108,7 +108,7 @@ cumulcalib <- function(y, p, method=c('BCI2p','CCI2p','BCI1p','CCI1p'), ordered=
 
 
 
-
+#' @export
 pMAD_BM <- function(x, max_m=100)
 {
   pi <- 3.1415926535897932384626
@@ -119,6 +119,7 @@ pMAD_BM <- function(x, max_m=100)
   return(4/pi*out)
 }
 
+#' @export
 qMAD_BM <- function(q)
 {
   x <- uniroot(function(x) {pMAD_BM(x)-q}, interval=c(0,10))
@@ -151,6 +152,7 @@ qMAD_BM <- function(q)
 
 
 #Taken from the CPAT package
+#' @export
 pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2), N=NULL)
 {
   if(!is.null(N)) q <- q*(1+0.12/sqrt(N)+0.11/N)
@@ -166,9 +168,7 @@ pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2), N=NULL)
 }
 
 
-
-
-
+#' @export
 qKolmogorov <- function(q, summands = ceiling(q * sqrt(72) + 3/2))
 {
   x <- uniroot(function(x) {pKolmogorov(x,summands)-q}, interval=c(0,10))
@@ -207,6 +207,7 @@ pMAD_BM_c <- function(q, w1, method=1, exp_tolerance=-30, summands = ceiling(q *
 
   out
 }
+
 
 qMAD_BM_c <- function(q, w1)
 {
@@ -257,15 +258,15 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_st
   {
     sig_p1 <- scale*qnorm(1-(1-draw_stats$sigs['p1'])/2)
 
-    if(method %in% c("CCI1p"))
+    if(method %in% c("BM"))
     {
       sig_p2 <- scale*qMAD_BM(draw_stats$sigs['p2'])
     }
-    if(method %in% c("CCI2p"))
+    if(method %in% c("BM2p"))
     {
-      sig_p2 <- scale*qMAD_BM_c(draw_stats$sigs['p2'],w1=unname(cumulcalib_obj$by_method$CCI2p$stat_by_component['mean']))
+      sig_p2 <- scale*qMAD_BM_c(draw_stats$sigs['p2'],w1=unname(cumulcalib_obj$by_method$BM2p$stat_by_component['mean']))
     }
-    if(method %in% c("BCI1p","BCI2p"))
+    if(method %in% c("BCI1p","BB"))
     {
       sig_p2 <- scale*qKolmogorov(draw_stats$sigs['p2'])
     }
@@ -334,7 +335,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_st
   }
 
   #P1 lines
-  if(method %in% c("CCI2p","BCI2p") && !is.null(draw_stats$cols['p1']))
+  if(method %in% c("BM2p","BB") && !is.null(draw_stats$cols['p1']))
   {
     lines(c(1,1),c(0,W[n]), col=draw_stats$cols['p1'])
     lines(c(0,1),c(sign_p1*sig_p1,sign_p1*sig_p1),col=draw_stats$cols['p1'],lty=2)
@@ -344,7 +345,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_st
   if(!is.null(draw_stats$cols['p2']))
   {
     loc <- cumulcalib_obj$by_method[[method]]$loc
-    if(method %in% c('BCI2p')) #If 2p bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
+    if(method %in% c('BB')) #If 2p bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
     {
       lines(c(0,1),c(0,W[n]),col="gray", lty=2)
       lines(c(t_[loc],t_[loc]),c(t_[loc]/t_[n]*W[n],W[loc]),col=draw_stats$cols['p2'])
@@ -392,18 +393,18 @@ summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
   print(paste("S_star:",cumulcalib_obj$S_star))
   print(paste("B_star:",cumulcalib_obj$B_star))
 
-  if(method=="CCI1p")
+  if(method=="BM")
   {
-    print("Method: One-part Brownian Motion (CCI1p)")
+    print("Method: One-part Brownian Motion (BM)")
     print(paste("Test statistic value:",cumulcalib_obj$by_method[[method]]$stat))
     print(paste("P-value:",cumulcalib_obj$by_method[[method]]$pval))
     print(paste("Location of maximum drift:",cumulcalib_obj$by_method[[method]]$loc,
                 " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
                 " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
   }
-  if(method=="CCI2p")
+  if(method=="BM2p")
   {
-    print("Method: Two-part Brownian Motion (CCI2p)")
+    print("Method: Two-part Brownian Motion (BM2p)")
     print("Test statistic values:")
     print(cumulcalib_obj$by_method[[method]]$stat_by_component)
     print("Component-wise p-values:")
@@ -423,9 +424,9 @@ summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
                 " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
                 " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
   }
-  if(method=="BCI2p")
+  if(method=="BB")
   {
-    print("Method: Two-part Brownian Bridge (BCI2p)")
+    print("Method: Two-part Brownian Bridge (BB)")
     print("Test statistic values:")
     print(cumulcalib_obj$by_method[[method]]$stat_by_component)
     print("Component-wise p-values:")

@@ -3,3 +3,7 @@
 S3method(plot,cumulcalib)
 S3method(summary,cumulcalib)
 export(cumulcalib)
+export(pKolmogorov)
+export(pMAD_BM)
+export(qKolmogorov)
+export(qMAD_BM)
