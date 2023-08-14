@@ -1,0 +1,84 @@
+---
+title: "Case Study"
+format: html
+editor: visual
+---
+
+## Cast Study (GUSTO-I)
+
+## 2023.08.07
+
+## Running Code
+
+```{r message=FALSE}
+library(knitr)
+source('case_study.R')
+```
+
+Data size:
+
+```{r echo=FALSE}
+kable(rbind(
+  cbind(dataset="dev_data1",n_obs=dim(dev_data1)[1],EY=mean(dev_data1$Y), Epi1=NA, Epi2=NA),
+  cbind(dataset="dev_data2",n_obs=dim(dev_data2)[1],EY=mean(dev_data2$Y), Epi1=NA, Epi2=NA),
+  cbind(dataset="val_data1",n_obs=dim(val_data1)[1],EY=mean(val_data1$Y), Epi1=mean(val_data1$pi1), Epi2=mean(val_data1$pi2)),
+  cbind(dataset="val_data2",n_obs=dim(val_data2)[1],EY=mean(val_data2$Y), Epi1=mean(val_data2$pi1), Epi2=mean(val_data2$pi2))))
+
+```
+
+### Model coefficients
+
+#### Model 1 (small dev)
+
+```{r}
+#summary(model1)
+round(coefficients(model1),3)
+
+```
+
+#### Model 2 (full dev)
+
+```{r}
+#summary(model2)
+round(coefficients(model2),3)
+```
+
+### AUCs
+
+```{r}
+res12$auc
+
+res22$auc
+```
+
+### Calibration resuls:
+
+#### Small dev, full val (12)
+
+```{r}
+plot(res12$calib$calibration_plot)
+
+plot(res12$cumul_calib,method="BM")
+summary(res12$cumul_calib,method="BM")
+plot(res12$cumul_calib, method="BB")
+summary(res12$cumul_calib, method="BB")
+
+res12$HL
+```
+
+One-part test interpretation: Location was at index `r res12$cumul_calib$loc`, corresponding to predicted value `r val_data2[res12$cumul_calib$loc,'pi1']` which is at `r round(100*res12$cumul_calib$loc/dim(val_data2)[1], 1)` percentile. Average bias on the left side: `r mean(val_data2$Y[1:res12$cumul_calib$loc])-mean(val_data2$pi1[1:res12$cumul_calib$loc])` and on the right-hand side: `r mean(val_data2$Y[-(1:res12$cumul_calib$loc)])-mean(val_data2$pi1[-(1:res12$cumul_calib$loc)])`
+
+#### full dev, full val (22)
+
+```{r}
+plot(res22$calib$calibration_plot)
+
+plot(res22$cumul_calib,method="BM")
+summary(res22$cumul_calib,method="BM")
+plot(res22$cumul_calib, method="BB")
+summary(res22$cumul_calib, method="BB")
+
+res22$HL
+```
+
+One-part test interpretation: Location was at index `r res22$cumul_calib$loc`, corresponding to predicted value `r val_data2[res22$cumul_calib$loc,'pi2']` which is at `r round(100*res22$cumul_calib$loc/dim(val_data2)[1], 1)` percentile. Average bias on the left side: `r mean(val_data2$Y[1:res22$cumul_calib$loc])-mean(val_data2$pi2[1:res22$cumul_calib$loc])` and on the right-hand side: `r mean(val_data2$Y[-(1:res22$cumul_calib$loc)])-mean(val_data2$pi2[-(1:res22$cumul_calib$loc)])`

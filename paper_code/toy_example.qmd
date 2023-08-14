@@ -1,0 +1,64 @@
+---
+title: "ToyExample"
+format: html
+editor: visual
+---
+
+```{r}
+library(cumulcalib)
+library(predtools)
+```
+
+```{r}
+set.seed(1)
+n <- 10000
+x_mu=0
+x_sd=1
+
+x <- rnorm(n,x_mu,x_sd)
+p <- 1/(1+exp(-(x)))
+y <- rbinom(n,1,p)
+
+dt <- data.frame(x=x, p=p, y=y)
+
+```
+
+### Calibrated
+
+```{r}
+dt$pi <- dt$p
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="BM", draw_stats=NULL)
+```
+
+### Mean-miscliabrated
+
+```{r}
+dt$pi <- 1/(1+exp(-(0.1+log(dt$p/(1-dt$p)))))
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="BM", draw_stats=NULL)
+```
+
+### Overfitted
+
+```{r}
+dt$pi <- 1/(1+exp(-(1.5*log(dt$p/(1-dt$p)))))
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="BM", draw_stats=NULL) 
+```
+
+### mean-miscalibrated and overfitted
+
+```{r}
+dt$pi <- 1/(1+exp(-(0.1+1.5*log(dt$p/(1-dt$p)))))
+cal_pi <- predtools::calibration_plot(dt, obs="y", pred="pi")
+cal_pi
+
+plot(cumulcalib::cumulcalib(dt$y, dt$pi), method="BM", draw_stats=NULL) 
+```
