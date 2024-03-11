@@ -109,14 +109,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Data size:</p>
 <div class="cell">
 <div class="cell-output-display">
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">dataset</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">n_obs</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">EY</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Epi1</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Epi2</th>
+<th style="text-align: left;">dataset</th>
+<th style="text-align: left;">n_obs</th>
+<th style="text-align: left;">EY</th>
+<th style="text-align: left;">Epi1</th>
+<th style="text-align: left;">Epi2</th>
 </tr>
 </thead>
 <tbody>
@@ -138,20 +145,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: left;">val_data1</td>
 <td style="text-align: left;">500</td>
 <td style="text-align: left;">0.062</td>
-<td style="text-align: left;">0.0699854621613362</td>
-<td style="text-align: left;">0.0699854405483401</td>
+<td style="text-align: left;">0.0699854621613361</td>
+<td style="text-align: left;">0.0699854405483402</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">val_data2</td>
 <td style="text-align: left;">23034</td>
 <td style="text-align: left;">0.0679430407224103</td>
-<td style="text-align: left;">0.068984792528345</td>
-<td style="text-align: left;">0.0695058071086447</td>
+<td style="text-align: left;">0.0689847925283449</td>
+<td style="text-align: left;">0.0695058071086448</td>
 </tr>
 </tbody>
 </table>
-
-
 </div>
 </div>
 <section id="model-coefficients" class="level3">
@@ -211,15 +216,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res12<span class="sc">$</span>cumul_calib,<span class="at">method=</span><span class="st">"BM"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "C_n: -0.00104175180593466"
-[1] "S_n: -0.695004245405753"
-[1] "C_star: 0.00421961645987526"
-[1] "S_star: 2.81511520967906"
+<pre><code>[1] "C_n: -0.00104175180593455"
+[1] "S_n: -0.695004245405677"
+[1] "C_star: 0.00421961645987535"
+[1] "S_star: 2.81511520967912"
 [1] "B_star: 3.33806872142875"
 [1] "Method: One-part Brownian Motion (BM)"
-[1] "Test statistic value: 2.81511520967906"
-[1] "P-value: 0.00975195002512996"
-[1] "Location of maximum drift: 21623  | time value: 0.752446499725159  | predictor value: 0.231769680615466"</code></pre>
+[1] "Test statistic value: 2.81511520967912"
+[1] "P-value: 0.00975195002512808"
+[1] "Location of maximum drift: 21623  | time value: 0.752446499725158  | predictor value: 0.231769680615466"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(res12<span class="sc">$</span>cumul_calib, <span class="at">method=</span><span class="st">"BB"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -227,10 +232,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res12<span class="sc">$</span>cumul_calib, <span class="at">method=</span><span class="st">"BB"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "C_n: -0.00104175180593466"
-[1] "S_n: -0.695004245405753"
-[1] "C_star: 0.00421961645987526"
-[1] "S_star: 2.81511520967906"
+<pre><code>[1] "C_n: -0.00104175180593455"
+[1] "S_n: -0.695004245405677"
+[1] "C_star: 0.00421961645987535"
+[1] "S_star: 2.81511520967912"
 [1] "B_star: 3.33806872142875"
 [1] "Method: Two-part Brownian Bridge (BB)"
 [1] "Test statistic values:"
@@ -240,8 +245,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         mean     distance 
 4.870526e-01 4.193740e-10 
 [1] "Combined value (Fisher'smethod): 4.7615706932902e-09"
-[1] "Terminal value (z score for mean claibration): -0.695004245405753"
-[1] "Location of maximum drift: 21623  | time value: 0.752446499725159  | predictor value: 0.231769680615466"</code></pre>
+[1] "Terminal value (z score for mean claibration): -0.695004245405677"
+[1] "Location of maximum drift: 21623  | time value: 0.752446499725158  | predictor value: 0.231769680615466"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>res12<span class="sc">$</span>HL</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -267,15 +272,15 @@ X-squared = 47.141, df = 8, p-value = 1.441e-07</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res22<span class="sc">$</span>cumul_calib,<span class="at">method=</span><span class="st">"BM"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "C_n: -0.00156276638623431"
-[1] "S_n: -1.00908104947688"
-[1] "C_star: 0.00200906446334091"
-[1] "S_star: 1.29725651574821"
-[1] "B_star: 1.02844827843829"
+<pre><code>[1] "C_n: -0.00156276638623442"
+[1] "S_n: -1.00908104947695"
+[1] "C_star: 0.00200906446334097"
+[1] "S_star: 1.29725651574825"
+[1] "B_star: 1.02844827843831"
 [1] "Method: One-part Brownian Motion (BM)"
-[1] "Test statistic value: 1.29725651574821"
-[1] "P-value: 0.388886850369115"
-[1] "Location of maximum drift: 15245  | time value: 0.287796643081862  | predictor value: 0.0603447711748226"</code></pre>
+[1] "Test statistic value: 1.29725651574825"
+[1] "P-value: 0.388886850369088"
+[1] "Location of maximum drift: 15245  | time value: 0.287796643081863  | predictor value: 0.0603447711748232"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(res22<span class="sc">$</span>cumul_calib, <span class="at">method=</span><span class="st">"BB"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -283,11 +288,11 @@ X-squared = 47.141, df = 8, p-value = 1.441e-07</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res22<span class="sc">$</span>cumul_calib, <span class="at">method=</span><span class="st">"BB"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "C_n: -0.00156276638623431"
-[1] "S_n: -1.00908104947688"
-[1] "C_star: 0.00200906446334091"
-[1] "S_star: 1.29725651574821"
-[1] "B_star: 1.02844827843829"
+<pre><code>[1] "C_n: -0.00156276638623442"
+[1] "S_n: -1.00908104947695"
+[1] "C_star: 0.00200906446334097"
+[1] "S_star: 1.29725651574825"
+[1] "B_star: 1.02844827843831"
 [1] "Method: Two-part Brownian Bridge (BB)"
 [1] "Test statistic values:"
      mean  distance 
@@ -295,9 +300,9 @@ X-squared = 47.141, df = 8, p-value = 1.441e-07</code></pre>
 [1] "Component-wise p-values:"
      mean  distance 
 0.3129358 0.2407444 
-[1] "Combined value (Fisher'smethod): 0.270143602791006"
-[1] "Terminal value (z score for mean claibration): -1.00908104947688"
-[1] "Location of maximum drift: 14657  | time value: 0.262527774654297  | predictor value: 0.0556592074702235"</code></pre>
+[1] "Combined value (Fisher'smethod): 0.270143602790971"
+[1] "Terminal value (z score for mean claibration): -1.00908104947695"
+[1] "Location of maximum drift: 14657  | time value: 0.262527774654297  | predictor value: 0.0556592074702234"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>res22<span class="sc">$</span>HL</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
