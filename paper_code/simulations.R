@@ -194,6 +194,7 @@ detailed_sim_power<-function(sample_sizes=c(100,250,500), X_dist=c(0,1), b0s=c(0
 process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=3, level1="b0", level2="b1", level3="sample_size", rounding_error=0.001)
 {
   require("sqldf")
+  require("MASS") #For fractions()
   l1_vals <- unique(x[,level1])
   l2_vals <- unique(x[,level2])
 
@@ -209,15 +210,25 @@ process_detailed_sim_results_graph<-function(x, detailed=F, n_col=5, dec_points=
       level3_values <- this_data[,1]
       values <- as.vector(rbind(t(this_data)[-1,],0))
       bp<-barplot(values,xaxt='n', yaxt='n', space=0, ylim=c(-0.25,1.6),col=c(my_palette,rgb(1,0,0)))
-      text(x=0.4+c(0:14)*1,y=values+0.25,ifelse(values==0,"",round(values,2)),cex=1, srt=90)
+      text(x=0.4+c(0:14)*1,y=values+0.25,ifelse(values==0,"",round(values,2)),cex=0.9, srt=90)
       text(x=c(1, 7 ,12),y=-0.1,paste(level3_values),cex=1.5)
-      text(x=5,y=1.5,paste0(" a=", fractions(i)," | b=", fractions(j)),cex=1.5,col="#600000")
+      text(x=6,y=1.5,paste0(" a=", fractions(i)," | b=", fractions(j)),cex=1.5,col="#600000")
     }
 }
 
 
-
-
+# res <- readRDS(paste0(path_to_results,"res_lin.RDS"))
+# setEPS()
+# postscript("./res_lin.eps")
+# process_detailed_sim_results_graph(res)
+# dev.off()
+#
+#
+#
+# setEPS()
+# postscript("./res_pow.eps")
+# process_detailed_sim_results_graph(res)
+# dev.off()
 
 
 
@@ -269,7 +280,7 @@ process_sim_null_behavior <- function(x, type="qq", val=c('BM'="pval.BM",'BB'="p
 
   if(type=="qq")
   {
-    par(mar=c(1,1,1,1))
+    par(mar=c(2,2,1,1))
 
     xs <- (0:100)/100
 
@@ -283,7 +294,10 @@ process_sim_null_behavior <- function(x, type="qq", val=c('BM'="pval.BM",'BB'="p
           ys <- ecdf(this_data)(xs)
           if(k==1)
           {
-            plot(xs,ys,xlim=c(0,1),ylim=c(0,1),type='l',col=my_palette[k], lwd=2)
+            xaxt <- yaxt <- 'n'
+            if(i==l1_vals[length(l1_vals)]) xaxt<-'s'
+            if(j==l2_vals[1]) yaxt<-'s'
+            plot(xs,ys,xlim=c(0,1),ylim=c(0,1),type='l',col=my_palette[k], lwd=2, xaxt=xaxt, yaxt=yaxt)
             lines(c(0,1),c(0,1),col="gray")
             title(paste0("n=",i," | b0=",j),line = -1)
           }

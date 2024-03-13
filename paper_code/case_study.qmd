@@ -57,7 +57,7 @@ res22$auc
 
 ```{r}
 plot(res12$calib$calibration_plot)
-
+plot(res12$scalib)
 plot(res12$cumul_calib,method="BM")
 summary(res12$cumul_calib,method="BM")
 plot(res12$cumul_calib, method="BB")
@@ -72,7 +72,7 @@ One-part test interpretation: Location was at index `r res12$cumul_calib$loc`, c
 
 ```{r}
 plot(res22$calib$calibration_plot)
-
+plot(res22$scalib)
 plot(res22$cumul_calib,method="BM")
 summary(res22$cumul_calib,method="BM")
 plot(res22$cumul_calib, method="BB")
