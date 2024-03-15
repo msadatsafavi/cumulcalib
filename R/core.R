@@ -1,11 +1,27 @@
+#' Cumulative calibration assessment
+#'
+#' This is the core function for performing cumulative calibration assessment
+#'
+#' @return an objective of class cumulcalib that can be printed or plotted
+#  @seealso [stringi::stri_length()] which this function wraps.
+#' @param y vector of binary responses
+#' @param p vector of predicted probabilities.
+#' @param method string with either BB (Brownian bridge test, default method), BM (Brownian motion test), BM2p (two-part BM test - experimental), BB1p (one-part BB test wit only the 'bridge' component). Multiple methods can be specified. The first one will be the 'main' method (e.g., when submitting the resulting object to plot()). Default is c("BB","BM")
+#' @param ordered if TRUE, y and p are already ordered based on ascending values of p. This is to speed up simulations.
+#' @param n_sim if >0, indicates a simulation-based test is requested for inference.
+#' @examples
+#' pi <- rbeta(1000,1,2)
+#' Y <- rbinom(length(pi),1,pi)
+#' res <- cumulcalib(Y, pi, method="BB")
+#' summary(res)
+#' plot(res)
 #' @export
-cumulcalib <- function(y, p, method=c('BB','BM2p','BM'), ordered=F, n_sim=0)
+cumulcalib <- function(y, p, method=c("BB","BM"), ordered=F, n_sim=0)
 {
   out <- list()
-
   methods <- list()
 
-  if(!ordered)
+  if(!ordered) #Order ascendingly based on p, if not already ordered
   {
     o <- order(p)
     p <- p[o]
@@ -14,34 +30,37 @@ cumulcalib <- function(y, p, method=c('BB','BM2p','BM'), ordered=F, n_sim=0)
 
   n <- length(p)
 
+  #The time component of the random walk
   T_ <- sum(p*(1-p)) #Total 'time'
-  t <- cumsum(p*(1-p))/T_
-  X <- p
+  t <- cumsum(p*(1-p))/T_ #time values at each p
+  X <- p #Predicted values
 
-  C <- cumsum(y-p)/n
-  C_n <- C[n]
-  C_star <- max(abs(C))
+  #Scaled cumulative sum (divided by n)
+  C <- cumsum(y-p)/n  #Scaled partial sum of prediction errors
+  C_n <- C[n] #Mean calibration error
+  C_star <- max(abs(C))  #Macimum distance
 
+  #This is the S process as described in the paper. The function returns all these metrics regardless of which method is used. But inference is only done per specified method(s)
   scale <- n/sqrt(T_)
   S <- scale*C
   S_star <- scale*C_star
   B_star <- max(abs(S-S[n]*t))
   S_n <- scale*C_n
 
+  #Inference part. We loop over the different methods requested by the user
   for(i in 1:length(method))
   {
     mt <- method[i]
 
-    if(mt %in% c('BM2p','BB'))
+    if(mt %in% c('BM2p','BB')) #Two-part BM and BB both generate component-specific p-values
     {
       stat1 <- S[n]
-      pval1 <- 2*pnorm(-abs(S[n]),0,1) #Two-sided z test
+      pval1 <- 2*pnorm(-abs(S[n]),0,1) #Two-sided z test for mean calibration
 
       if(mt=='BB')
       {
-        S2 <- S-S[n]*t/t[n]
-        loc <- which.max(abs(S2))
-        stat2 <- max(abs(S2))
+        loc <- which.max(S-S[n]*t)  #The bridge component of the BB test
+        stat2 <- B_star
         pval2 <- 1-pKolmogorov(stat2)
       }
       else
@@ -51,7 +70,7 @@ cumulcalib <- function(y, p, method=c('BB','BM2p','BM'), ordered=F, n_sim=0)
         pval2 <- 1-pMAD_BM_c(stat2, w1=S[n])
       }
 
-      fisher <- -2*(log(pval1)+log(pval2))
+      fisher <- -2*(log(pval1)+log(pval2))  #Fisher's method for combining p-values
       pval <- 1-pchisq(fisher,4)
 
       methods[[mt]]$stat <- fisher
@@ -61,9 +80,9 @@ cumulcalib <- function(y, p, method=c('BB','BM2p','BM'), ordered=F, n_sim=0)
       methods[[mt]]$loc <- loc
     }
 
-    if(mt %in% c('BM','BCI1p'))
+    if(mt %in% c('BM','BB1p'))  #These are one-part methods
     {
-      if(mt=='BCI1p')
+      if(mt=='BB1p')
       {
         S2 <- S-S[n]*t
         loc <- which.max(abs(S2))
@@ -85,8 +104,8 @@ cumulcalib <- function(y, p, method=c('BB','BM2p','BM'), ordered=F, n_sim=0)
     }
   }
 
-  out$data <- cbind(X=X,t=t,C=C, S=S)
-  out$method <- names(methods[1])
+  out$data <- cbind(X=X,t=t,C=C, S=S) #Returns the generated random-walk
+  out$method <- names(methods[1]) #The base method is the first requested one
 
   out$scale <- scale
   out$C_n <- C_n
@@ -108,21 +127,30 @@ cumulcalib <- function(y, p, method=c('BB','BM2p','BM'), ordered=F, n_sim=0)
 
 
 
+
+
+#' CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval
+#' @return a scalar value
+#' @param q the quantity at which CDF will be evaluated. Currently accepts only a scalar
+#' @param summands maximum number of terms to be evaluated in the infinite series (default=100)
 #' @export
-pMAD_BM <- function(x, max_m=100)
+pMAD_BM <- function(q, summands=100)
 {
-  pi <- 3.1415926535897932384626
-  out <-0
-  m<-0:max_m
-  out <- sum((-1)^m/(2*m+1)*exp(-(2*m+1)^2*pi^2/8/x^2))
+  pi <- base::pi
+  m<-0:summands
+  out <- sum((-1)^m/(2*m+1)*exp(-(2*m+1)^2*pi^2/8/q^2))
 
   return(4/pi*out)
 }
 
+
+#' Quantile function of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval
+#' @return a scalar value
+#' @param p the quantity at which the quantile function will be evaluated. Currently accepts only a scalar
 #' @export
-qMAD_BM <- function(q)
+qMAD_BM <- function(p)
 {
-  x <- uniroot(function(x) {pMAD_BM(x)-q}, interval=c(0,10))
+  x <- uniroot(function(x) {pMAD_BM(x)-p}, interval=c(0,10))
   unname(x$root)
 }
 
@@ -151,11 +179,14 @@ qMAD_BM <- function(q)
 
 
 
-#Taken from the CPAT package
+#' CDF of the Kolmogorov distribution
+#' @return a scalar value
+#' @param q the quantity at which CDF will be evaluated. Currently accepts only a scalar
+#' @param sumands maximum number of terms to be evaluated in the infinite series (default=ceiling(q*sqrt(72)+3/2))
 #' @export
-pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2), N=NULL)
+pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2))
 {
-  if(!is.null(N)) q <- q*(1+0.12/sqrt(N)+0.11/N)
+  if(!is.null(summands)) q <- q*(1+0.12/sqrt(summands)+0.11/summands)
 
   sqrt(2 * pi) * sapply(q, function(x) {
     if (x > 0) {
@@ -168,15 +199,27 @@ pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2), N=NULL)
 }
 
 
+#' Quantile function of the Kolmogorov distribution
+#' @return a scalar value
+#' @param p the quantity at which the quantile function will be evaluated. Currently accepts only a scalar
 #' @export
-qKolmogorov <- function(q, summands = ceiling(q * sqrt(72) + 3/2))
+qKolmogorov <- function(p)
 {
-  x <- uniroot(function(x) {pKolmogorov(x,summands)-q}, interval=c(0,10))
+  x <- uniroot(function(x) {pKolmogorov(x)-p}, interval=c(0,10))
   unname(x$root)
 }
 
 
 
+
+#' CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value
+#' @return a scalar value
+#' @param q the quantity at which CDF will be evaluated. Currently accepts only a scalar
+#' @param w1 the terminal value
+#' @param method different infinite series to use (1,2,3)
+#' @param tolerance numerical tolerance as the stopping rule when evaluating the infinite sum (default -30 on the expotential scale)
+#' @param summands number of terms to evaluate (default is ceiling(q * sqrt(72) + 3/2))
+#' @export
 pMAD_BM_c <- function(q, w1, method=1, exp_tolerance=-30, summands = ceiling(q * sqrt(72) + 3/2))
 {
   if(q<=max(0,w1)) return(0)
@@ -209,9 +252,16 @@ pMAD_BM_c <- function(q, w1, method=1, exp_tolerance=-30, summands = ceiling(q *
 }
 
 
-qMAD_BM_c <- function(q, w1)
+
+
+#' Quantile function of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value
+#' @return a scalar value
+#' @param p the quantity at which the quantile function will be evaluated. Currently accepts only a scalar
+#' @param w1 the terminal value
+#' @export
+qMAD_BM_c <- function(p, w1)
 {
-  x <- uniroot(function(x) {pMAD_BM_c(x,w1)-q}, interval=c(0,10))
+  x <- uniroot(function(x) {pMAD_BM_c(x,w1)-p}, interval=c(0,10))
   unname(x$root)
 }
 
@@ -220,28 +270,30 @@ qMAD_BM_c <- function(q, w1)
 
 
 
+#' Generates cumulative calibration plots
+#' @return None
+#' @param cumulcalib_obj An object of class cumulcalib generated by cumulcalib()
+#' @param method Which method to use. Options are BB (Brownian bridge test), BM (Brownian motion test), BB1p (1-part Brownian bridge test), and BM2p (2-part Brownian bridge test). If unspecified, returns the default method used in the cumulcalib() call
+#' @param draw_stats a list with two elements: sigs=significance levels (a scalar if one-part test, a vector of 2 if two-part test) and cols=colors (a character string if one-part test, a vector of two-character strings if two-part test). Default is list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red'))
+#' @param x2axis=T If true, draws a second x-axis (on top) showing predicted risks
+#' @param y2axis=T If true, draws a second y-axis (on right) showing scaled partial sums
 #' @export
-plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_stats=list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red')), xaxes=c('t','pi') , ...)
+plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stats=list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red')), x2axis=T, y2axis=T, ...)
 {
   args <- list(...)
   if(is.null(method))
   {
     method <- cumulcalib_obj$method
   }
+  else
+  {
+    if(!("BM" %in% names(cumulcalib_obj$by_method)))
+       stop("The requested method has not been requested in the original cumulcalib() call")
+  }
 
   t_ <- cumulcalib_obj$data[,'t']
   X <- cumulcalib_obj$data[,'X']
-
-  if(standardized)
-  {
-    W <- cumulcalib_obj$data[,'C']*cumulcalib_obj$scale
-    scale <- 1
-  }
-  else
-  {
-    W <- cumulcalib_obj$data[,'C']
-    scale <- 1/cumulcalib_obj$scale
-  }
+  W <- cumulcalib_obj$data[,'S']
 
   n <- length(W)
 
@@ -256,19 +308,19 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_st
   sig_p1 <- sig_p2 <- 0 #0 indicates do not draw
   if(!is.null(draw_stats))
   {
-    sig_p1 <- scale*qnorm(1-(1-draw_stats$sigs['p1'])/2)
+    sig_p1 <- qnorm(1-(1-draw_stats$sigs['p1'])/2)
 
     if(method %in% c("BM"))
     {
-      sig_p2 <- scale*qMAD_BM(draw_stats$sigs['p2'])
+      sig_p2 <- qMAD_BM(draw_stats$sigs['p2'])
     }
     if(method %in% c("BM2p"))
     {
-      sig_p2 <- scale*qMAD_BM_c(draw_stats$sigs['p2'],w1=unname(cumulcalib_obj$by_method$BM2p$stat_by_component['mean']))
+      sig_p2 <- qMAD_BM_c(draw_stats$sigs['p2'],w1=unname(cumulcalib_obj$by_method$BM2p$stat_by_component['mean']))
     }
-    if(method %in% c("BCI1p","BB"))
+    if(method %in% c("BB1p","BB"))
     {
-      sig_p2 <- scale*qKolmogorov(draw_stats$sigs['p2'])
+      sig_p2 <- qKolmogorov(draw_stats$sigs['p2'])
     }
   }
 
@@ -280,7 +332,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_st
   i <- match("ylim",names(args))
   if(is.na(i))
   {
-    args$ylim<- c(min(W,-sig_p1*(sign_p1==-1),-sig_p2*(sign_p2==-1),-scale),max(W,sig_p1*(sign_p1==1),sig_p2*(sign_p2==1),scale))
+    args$ylim<- c(min(W,-sig_p1*(sign_p1==-1),-sig_p2*(sign_p2==-1),-1),max(W,sig_p1*(sign_p1==1),sig_p2*(sign_p2==1),1))
   }
   i <- match("type",names(args))
   if(is.na(i))
@@ -297,41 +349,53 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_st
   {
     args$yaxt<-'n'
   }
+  i <- match("xlab",names(args))
+  if(is.na(i))
+  {
+    args$xlab<-'Time'
+  }
+  i <- match("ylab",names(args))
+  if(is.na(i))
+  {
+    args$ylab<-'Standardized cumulative sum'
+  }
 
   args$x<-t_
   args$y<-W
 
-  args$xlab<-""
-  args$ylab<-ifelse(standardized,"Standardized cumulative sum", "Scaled cumulative sum")
-
   args$xaxs<-'i'
+
+  par(mar=c(3,3,ifelse(x2axis,3,1),ifelse(y2axis,3,1)))
 
   do.call(plot, args)
 
   #Axes
-  i <- match('t',xaxes)
-  if(!is.na(i))
+  axis(1, line=0,  at=(0:10)/10, labels=(0:10)/10, padj=0)
+  mtext(args$xlab, 1, line=2)
+
+  axis(side=2, at=pretty(args$ylim), padj=0)
+  mtext(args$ylab, 2, line=2)
+
+  if(x2axis)
   {
-    side<-ifelse(i==1,1,3)
-    axis(side,at=(0:10)/10, labels=(0:10)/10)
-    mtext('t',side, line=2)
-  }
-  i <- match('pi',xaxes)
-  if(!is.na(i))
-  {
-    side<-ifelse(i==1,1,3)
     xs <- round(unlist(lapply((0:10)/10, function (x) {cumulcalib_obj$data[which.min((cumulcalib_obj$data[,'t']-x)^2),'X']})),3)
-    axis(side=side, at = (0:10)/10, labels=xs , padj = 1)
-    mtext(expression(pi),side,line=2)
+    axis(side=3, at=(0:10)/10, labels=xs, padj=0)
+    mtext("Predicted values", 3, line=2) #expression(pi) for label will generate the symbol!
   }
 
-  axis(side=2, at=pretty(args$ylim))
+  if(y2axis)
+  {
+    y2p <- pretty(args$ylim/cumulcalib_obj$scale)
+    axis(side=4, at=y2p*cumulcalib_obj$scale, labels=y2p, padj=0)
+    mtext('Scaled cumulative sum',4, line=2)
+  }
+
 
   lines(c(0,1),c(0,0),col="grey")
 
   #Triangle
   {
-    polygon(x=c(0,-0.03,-0.03), y=c(0,-1,1)*scale, col = 'black')
+    polygon(x=c(0,-0.03,-0.03), y=c(0,-1,1), col = 'black')
   }
 
   #P1 lines
@@ -345,7 +409,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, standardized=T, draw_st
   if(!is.null(draw_stats$cols['p2']))
   {
     loc <- cumulcalib_obj$by_method[[method]]$loc
-    if(method %in% c('BB')) #If 2p bridge test then adjust the length of the red line and draw the bridge line, BUT only if the graph is standardized
+    if(method %in% c('BB')) #If 2p bridge test then adjust the length of the red line and draw the bridge line
     {
       lines(c(0,1),c(0,W[n]),col="gray", lty=2)
       lines(c(t_[loc],t_[loc]),c(t_[loc]/t_[n]*W[n],W[loc]),col=draw_stats$cols['p2'])
@@ -378,13 +442,23 @@ pKolmogorov2 <- function(x, n=100)
 
 
 
+#' Summarizes a cumulcalib object
+#' @return None
+#' @param cumulcalib_obj An object of class cumulcalib generated by cumulcalib()
+#' @param method Which method to use. Options are BB (Brownian bridge test), BM (Brownian motion test), BB1p (1-part Brownian bridge test), and BM2p (2-part Brownian bridge test). If unspecified, returns the default method used in the cumulcalib() call
 #' @export
-summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
+print.cumulcalib <- function(cumulcalib_obj, method=NULL)
 {
   if(is.null(method))
   {
     method <- cumulcalib_obj$method
   }
+  else
+  {
+    if(!("BM" %in% names(cumulcalib_obj$by_method)))
+      stop("The requested method has not been requested in the original cumulcalib() call")
+  }
+
 
   n <- dim(cumulcalib_obj$data)[1]
   print(paste("C_n:",cumulcalib_obj$C_n))
@@ -415,9 +489,9 @@ summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
                 " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
                 " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
   }
-  if(method=="BCI1p")
+  if(method=="BB1p")
   {
-    print("Method: One-part Brownian Bridge (BCI1p)")
+    print("Method: One-part Brownian Bridge (BB1p)")
     print(paste("Test statistic value:",cumulcalib_obj$by_method[[method]]$stat))
     print(paste("P-value:",cumulcalib_obj$by_method[[method]]$pval))
     print(paste("Location of maximum drift:",cumulcalib_obj$by_method[[method]]$loc,
@@ -437,4 +511,15 @@ summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
                 " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
                 " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
   }
+}
+
+
+#' Prints a cumulcalib object
+#' @return None
+#' @param cumulcalib_obj An object of class cumulcalib generated by cumulcalib()
+#' @param method Which method to use. Options are BB (Brownian bridge test), BM (Brownian motion test), BB1p (1-part Brownian bridge test), and BM2p (2-part Brownian bridge test). If unspecified, returns the default method used in the cumulcalib() call
+#' @export
+summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
+{
+  print.cumulcalib(cumulcalib_obj, method)
 }
