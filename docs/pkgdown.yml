@@ -1,0 +1,7 @@
+pandoc: 3.1.5
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  cumulcalib: cumulcalib.html
+last_built: 2024-03-17T06:29Z
+
