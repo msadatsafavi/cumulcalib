@@ -1,0 +1,88 @@
+---
+title: "cumulcalib"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cumulcalib}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width=5, fig.height=3
+  ) 
+```
+
+This vignette demonstrate how to assess model calibration using the cumulative calibration methodology. This is a simple 
+
+We first show how to evaluate this in general, and the specific features that the cumulcalib package provides.
+
+## What is cumulative calibration assessment?
+The idea behind cumulative calibration assessment is simple.  The conventional calibration plot is the plot of an estimate of the conditional mean $f(z)=\mathbb{E}(Y|\pi=z)$ versus $z$. Evaluating moderate calibration is equivalent to evaluating whether $f(z)=z$. In the common situation that the $\pi$s are generated from a continuous distribution, estimating $f(z)$ requires regularization (e.g., binning or smoothing). However, one can also examine moderate calibration on the partial sum domain. Consider the partial sums of predictions, $\sum_{i=1}^{n} \pi_iI(\pi_i \leq z)$, and the corresponding partial sums of responses, $\sum_{i=1}^{n} Y_iI(\pi_i \leq z)$ , where $I()$ is the indicator function. It follows immediately from the definition of moderate calibration that \replaced{$\mathbb{E} \big[ \sum_{i=1}^{n} Y_iI(\pi_i \leq z) \big] = \sum_{i=1}^{n} \pi_iI(\pi_i \leq z)$}{$\mathbb{E} \sum_{i=1}^{n} Y_iI(\pi_i \leq z) = \sum_{i=1}^{n} \pi_iI(\pi_i \leq z)$} under $H_0$ for all $z$s. Evaluating this equality for any fixed $z$ no longer requires regularization as, after scaling by $n$, the expectation can be consistently estimated from the data. 
+
+
+## An example based on GUSTO data
+The GUSTO-I data are available from the _predtools_ package. Please install this package first.
+
+
+```{r}
+  library(predtools)
+  data(gusto)
+  set.seed(111111)
+```
+Imagine we have two logistic regression modlesL
+
+```{r}
+  gusto$kill <- (as.numeric(gusto$Killip)>1)*1
+  gusto$Y <- gusto$day30
+  
+  val_data <- gusto[gusto$regl %in% c(1, 7, 9, 10, 11, 12, 14, 15),]
+  dev_data_large <- gusto[!gusto$regl %in% c(1, 7, 9, 10, 11, 12, 14, 15),]
+  dev_data_small <- dev_data_large[sample(nrow(dev_data_large),500,F),]  
+```
+
+
+
+
+```{r}
+  model1 <- glm(Y ~ age + miloc + pmi + kill + pmin(sysbp,100) + pulse, data=dev_data_small, family=binomial(link="logit"))
+  model2 <- glm(Y ~ age + miloc + pmi + kill + pmin(sysbp,100) + pulse, data=dev_data_large, family=binomial(link="logit"))
+```
+
+
+
+```{r}
+  val_data$pi1  <- predict(model1, type="response", newdata=val_data)
+  val_data$pi2 <- predict(model2, type="response", newdata=val_data)
+```
+
+
+### Calibration plots
+
+```{r, fig.width = 4, fig.height = 4}
+  predtools::calibration_plot(val_data, obs="Y", pred="pi1")
+  predtools::calibration_plot(val_data, obs="Y", pred="pi2")
+```
+
+### Cumulative calibration plots
+
+
+```{r}
+  res1<-cumulcalib::cumulcalib(val_data$Y, val_data$pi1)
+  res2<-cumulcalib::cumulcalib(val_data$Y, val_data$pi2)
+```
+
+
+```{r}
+  plot(res1)
+  summary(res1, method="BM")
+```
+
+
+
+```{r}
+  plot(res2)
+  summary(res2, method="BM")
+```

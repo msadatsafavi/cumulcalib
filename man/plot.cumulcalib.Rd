@@ -7,7 +7,10 @@
 \method{plot}{cumulcalib}(
   cumulcalib_obj,
   method = NULL,
-  draw_stats = list(sigs = c(p1 = 0.95, p2 = 0.95), cols = c(p1 = "blue", p2 = "red")),
+  draw_stat = T,
+  stat_col = c("blue", "red"),
+  draw_sig = T,
+  sig_level = c(0.95, 0.95),
   x2axis = T,
   y2axis = T,
   ...
@@ -18,7 +21,15 @@
 
 \item{method}{Which method to use. Options are BB (Brownian bridge test), BM (Brownian motion test), BB1p (1-part Brownian bridge test), and BM2p (2-part Brownian bridge test). If unspecified, returns the default method used in the cumulcalib() call}
 
-\item{draw_stats}{a list with two elements: sigs=significance levels (a scalar if one-part test, a vector of 2 if two-part test) and cols=colors (a character string if one-part test, a vector of two-character strings if two-part test). Default is list(sigs=c(p1=0.95,p2=0.95), cols=c(p1='blue',p2='red'))}
+\item{draw_stat}{Should the statistic (terminal value an/or maximum drift, depending on method) be drawn? Default is TRUE}
+
+\item{stat_col}{The color(s) to draw the stat. Default is c('blue','red'). For single-part tests (BM and BB1p) only the first element is used}
+
+\item{sig_level}{If to draw significance lines, at what level? Default is c(0.95,0.95). For single-part tests (BM and BB1p) only the first element is used}
+
+\item{...}{Parameters to be passed to plot()}
+
+\item{draw_sigs}{Whether significance lines should be drawn. Default is T. Colors will be the same as stat_col}
 
 \item{x2axis=T}{If true, draws a second x-axis (on top) showing predicted risks}
 

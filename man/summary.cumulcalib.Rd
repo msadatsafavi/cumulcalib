@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{summary.cumulcalib}
 \alias{summary.cumulcalib}
-\title{Prints a cumul_calib object}
+\title{Summarizes a cumulcalib object}
 \usage{
 \method{summary}{cumulcalib}(cumulcalib_obj, method = NULL)
 }
@@ -15,5 +15,5 @@
 None
 }
 \description{
-Prints a cumul_calib object
+Summarizes a cumulcalib object
 }
