@@ -32,6 +32,7 @@ cumulcalib <- function(y, p, method=c("BB","BM"), ordered=F, n_sim=0)
 
   #The time component of the random walk
   T_ <- sum(p*(1-p)) #Total 'time'
+  if(T_<30) warning("Total obsered time (sum(pi*(1-pi))) is less than 30; the data might be too small for reliable inference.")
   t <- cumsum(p*(1-p))/T_ #time values at each p
   X <- p #Predicted values
 
@@ -186,7 +187,7 @@ qMAD_BM <- function(p)
 #' @export
 pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2))
 {
-  if(!is.null(summands)) q <- q*(1+0.12/sqrt(summands)+0.11/summands)
+  #if(!is.null(summands)) q <- q*(1+0.12/sqrt(summands)+0.11/summands)
 
   sqrt(2 * pi) * sapply(q, function(x) {
     if (x > 0) {
