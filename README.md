@@ -8,7 +8,9 @@
 [![R-CMD-check](https://github.com/msadatsafavi/cumulcalib/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/msadatsafavi/cumulcalib/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of cumulcalib is to …
+The goal of cumulcalib is to enable the use of the assessment of risk
+prediction model calibration using the cumulative calibration
+methodology.
 
 ## Installation
 
@@ -26,29 +28,25 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(cumulcalib)
-## basic example code
+
+set.seed(1)
+p <- rbeta(1000, 1,5)
+y <- rbinom(1000,1,p)
+
+res <- cumulcalib(y, p)
+
+summary(res)
+#> [1] "C_n (mean calibration error): 0.00532270104567871"
+#> [1] "C* (maximum absolute cumulative calibration error): 0.00740996981029672"
+#> [1] "Method: Two-part Brownian Bridge (BB)"
+#> [1] "S_n (Z score for mean calibration error) 0.489295496431201"
+#> [1] "B* (test statistic for maximum absolute bridged calibration error): 0.904915434767163"
+#> [1] "Component-wise p-values:"
+#>      mean  distance 
+#> 0.6246325 0.3859797 
+#> [1] "Combined value (Fisher'smethod): 0.584068794836004"
+#> [1] "Location of maximum drift: 812  | time value: 0.632911942275094  | predictor value: 0.28191196504736"
+plot(res, draw_sig=F)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+<img src="man/figures/README-example-1.png" width="100%" />
