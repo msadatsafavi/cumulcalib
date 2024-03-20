@@ -463,55 +463,52 @@ summary.cumulcalib <- function(cumulcalib_obj, method=NULL)
 
 
   n <- dim(cumulcalib_obj$data)[1]
-  print(paste("C_n:",cumulcalib_obj$C_n))
-  print(paste("S_n:",cumulcalib_obj$S_n))
-  print(paste("C_star:",cumulcalib_obj$C_star))
-  print(paste("S_star:",cumulcalib_obj$S_star))
-  print(paste("B_star:",cumulcalib_obj$B_star))
+  print(paste("C_n (mean calibration error):",cumulcalib_obj$C_n))
+  print(paste("C* (maximum absolute cumulative calibration error):",cumulcalib_obj$C_star))
 
   if(method=="BM")
   {
     print("Method: One-part Brownian Motion (BM)")
-    print(paste("Test statistic value:",cumulcalib_obj$by_method[[method]]$stat))
-    print(paste("P-value:",cumulcalib_obj$by_method[[method]]$pval))
-    print(paste("Location of maximum drift:",cumulcalib_obj$by_method[[method]]$loc,
-                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
-                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
+    print(paste("S* (test statistic for cumulative calibration error):",cumulcalib_obj$S_star))
+    print(paste("P-value:",cumulcalib_obj$by_method$BM$pval))
+    print(paste("Location of maximum drift:",cumulcalib_obj$by_method$BM$loc,
+                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BM$loc,'t'],
+                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BM$loc,'X']))
   }
   if(method=="BM2p")
   {
     print("Method: Two-part Brownian Motion (BM2p)")
-    print("Test statistic values:")
-    print(cumulcalib_obj$by_method[[method]]$stat_by_component)
+    print(paste("S_n (Z score for mean calibration error)",cumulcalib_obj$S_n))
+    print(paste("S* (test statistic for cumulative calibration error):",cumulcalib_obj$S_star))
+    print(cumulcalib_obj$by_method$BM2p$stat_by_component)
     print("Component-wise p-values:")
-    print(cumulcalib_obj$by_method[[method]]$pval_by_component)
-    print(paste("Combined value (Fisher'smethod):",cumulcalib_obj$by_method[[method]]$pval))
-    print(paste("Terminal value (z score for mean claibration):", cumulcalib_obj$data[n,'S']))
-    print(paste("Location of maximum drift:",cumulcalib_obj$by_method[[method]]$loc,
-                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
-                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
+    print(cumulcalib_obj$by_method$BM2p$pval_by_component)
+    print(paste("Combined value (Fisher'smethod):",cumulcalib_obj$by_method$BM2p$pval))
+    print(paste("Location of maximum drift:",cumulcalib_obj$by_method$BM2p$loc,
+                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BM2p$loc,'t'],
+                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BM2p$loc,'X']))
   }
   if(method=="BB1p")
   {
     print("Method: One-part Brownian Bridge (BB1p)")
-    print(paste("Test statistic value:",cumulcalib_obj$by_method[[method]]$stat))
-    print(paste("P-value:",cumulcalib_obj$by_method[[method]]$pval))
-    print(paste("Location of maximum drift:",cumulcalib_obj$by_method[[method]]$loc,
-                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
-                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
+    print(paste("B* (test statistic for maximum absolute bridged calibration error):",cumulcalib_obj$B_star))
+    print(paste("Test statistic value:",cumulcalib_obj$by_method$BB1p$stat))
+    print(paste("P-value:",cumulcalib_obj$by_method$BB1p$pval))
+    print(paste("Location of maximum drift:",cumulcalib_obj$by_method$BB1p$loc,
+                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BB1p$loc,'t'],
+                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BB1p$loc,'X']))
   }
   if(method=="BB")
   {
     print("Method: Two-part Brownian Bridge (BB)")
-    print("Test statistic values:")
-    print(cumulcalib_obj$by_method[[method]]$stat_by_component)
+    print(paste("S_n (Z score for mean calibration error)",cumulcalib_obj$S_n))
+    print(paste("B* (test statistic for maximum absolute bridged calibration error):",cumulcalib_obj$B_star))
     print("Component-wise p-values:")
-    print(cumulcalib_obj$by_method[[method]]$pval_by_component)
-    print(paste("Combined value (Fisher'smethod):",cumulcalib_obj$by_method[[method]]$pval))
-    print(paste("Terminal value (z score for mean claibration):", cumulcalib_obj$data[n,'S']))
-    print(paste("Location of maximum drift:",cumulcalib_obj$by_method[[method]]$loc,
-                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'t'],
-                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method[[method]]$loc,'X']))
+    print(cumulcalib_obj$by_method$BB$pval_by_component)
+    print(paste("Combined value (Fisher'smethod):",cumulcalib_obj$by_method$BB$pval))
+    print(paste("Location of maximum drift:",cumulcalib_obj$by_method$BB$loc,
+                " | time value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BB$loc,'t'],
+                " | predictor value:", cumulcalib_obj$data[cumulcalib_obj$by_method$BB$loc,'X']))
   }
 }
 
