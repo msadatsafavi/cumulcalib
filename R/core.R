@@ -56,7 +56,7 @@ cumulcalib <- function(y, p, method=c("BB","BM"), ordered=F, n_sim=0)
     if(mt %in% c('BM2p','BB')) #Two-part BM and BB both generate component-specific p-values
     {
       stat1 <- S[n]
-      pval1 <- 2*pnorm(-abs(S[n]),0,1) #Two-sided z test for mean calibration
+      pval1 <- 2*stats::pnorm(-abs(S[n]),0,1) #Two-sided z test for mean calibration
 
       if(mt=='BB')
       {
@@ -72,7 +72,7 @@ cumulcalib <- function(y, p, method=c("BB","BM"), ordered=F, n_sim=0)
       }
 
       fisher <- -2*(log(pval1)+log(pval2))  #Fisher's method for combining p-values
-      pval <- 1-pchisq(fisher,4)
+      pval <- 1-stats::pchisq(fisher,4)
 
       methods[[mt]]$stat <- fisher
       methods[[mt]]$pval <- pval
@@ -130,7 +130,7 @@ cumulcalib <- function(y, p, method=c("BB","BM"), ordered=F, n_sim=0)
 
 
 
-#' CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval
+#' CDF of the distribution of the maximum absolute deviation of Brownian motion in \[0,1\] interval
 #' @return a scalar value
 #' @param q the quantity at which CDF will be evaluated. Currently accepts only a scalar
 #' @param summands maximum number of terms to be evaluated in the infinite series (default=100)
@@ -145,13 +145,13 @@ pMAD_BM <- function(q, summands=100)
 }
 
 
-#' Quantile function of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval
+#' Quantile function of the distribution of the maximum absolute deviation of Brownian motion in \[0,1\] interval
 #' @return a scalar value
 #' @param p the quantity at which the quantile function will be evaluated. Currently accepts only a scalar
 #' @export
 qMAD_BM <- function(p)
 {
-  x <- uniroot(function(x) {pMAD_BM(x)-p}, interval=c(0,10))
+  x <- stats::uniroot(function(x) {pMAD_BM(x)-p}, interval=c(0,10))
   unname(x$root)
 }
 
@@ -183,7 +183,7 @@ qMAD_BM <- function(p)
 #' CDF of the Kolmogorov distribution
 #' @return a scalar value
 #' @param q the quantity at which CDF will be evaluated. Currently accepts only a scalar
-#' @param sumands maximum number of terms to be evaluated in the infinite series (default=ceiling(q*sqrt(72)+3/2))
+#' @param summands maximum number of terms to be evaluated in the infinite series (default=ceiling(q*sqrt(72)+3/2))
 #' @export
 pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2))
 {
@@ -206,19 +206,19 @@ pKolmogorov <- function (q, summands=ceiling(q*sqrt(72)+3/2))
 #' @export
 qKolmogorov <- function(p)
 {
-  x <- uniroot(function(x) {pKolmogorov(x)-p}, interval=c(0,10))
+  x <- stats::uniroot(function(x) {pKolmogorov(x)-p}, interval=c(0,10))
   unname(x$root)
 }
 
 
 
 
-#' CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value
+#' CDF of the distribution of the maximum absolute deviation of Brownian motion in \[0,1\] interval, conditional on its terminal value
 #' @return a scalar value
 #' @param q the quantity at which CDF will be evaluated. Currently accepts only a scalar
 #' @param w1 the terminal value
 #' @param method different infinite series to use (1,2,3)
-#' @param tolerance numerical tolerance as the stopping rule when evaluating the infinite sum (default -30 on the expotential scale)
+#' @param exp_tolerance numerical tolerance as the stopping rule when evaluating the infinite sum (default -30 on the expotential scale)
 #' @param summands number of terms to evaluate (default is ceiling(q * sqrt(72) + 3/2))
 #' @export
 pMAD_BM_c <- function(q, w1, method=1, exp_tolerance=-30, summands = ceiling(q * sqrt(72) + 3/2))
@@ -245,7 +245,7 @@ pMAD_BM_c <- function(q, w1, method=1, exp_tolerance=-30, summands = ceiling(q *
   if(3 %in% method)
   { #Wrong
     n <- -1000:1000
-    x <- sum(dnorm(w1+4*n*q)-dnorm(w1+4*n*q+2*q))
+    x <- sum(stats::dnorm(w1+4*n*q)-stats::dnorm(w1+4*n*q+2*q))
     out <- c(out,x)
   }
 
@@ -255,14 +255,14 @@ pMAD_BM_c <- function(q, w1, method=1, exp_tolerance=-30, summands = ceiling(q *
 
 
 
-#' Quantile function of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value
+#' Quantile function of the distribution of the maximum absolute deviation of Brownian motion in \[0,1\] interval, conditional on its terminal value
 #' @return a scalar value
 #' @param p the quantity at which the quantile function will be evaluated. Currently accepts only a scalar
 #' @param w1 the terminal value
 #' @export
 qMAD_BM_c <- function(p, w1)
 {
-  x <- uniroot(function(x) {pMAD_BM_c(x,w1)-p}, interval=c(0,10))
+  x <- stats::uniroot(function(x) {pMAD_BM_c(x,w1)-p}, interval=c(0,10))
   unname(x$root)
 }
 
@@ -277,10 +277,10 @@ qMAD_BM_c <- function(p, w1)
 #' @param method Which method to use. Options are BB (Brownian bridge test), BM (Brownian motion test), BB1p (1-part Brownian bridge test), and BM2p (2-part Brownian bridge test). If unspecified, returns the default method used in the cumulcalib() call
 #' @param draw_stat Should the statistic (terminal value an/or maximum drift, depending on method) be drawn? Default is TRUE
 #' @param stat_col The color(s) to draw the stat. Default is c('blue','red'). For single-part tests (BM and BB1p) only the first element is used
-#' @param draw_sigs Whether significance lines should be drawn. Default is T. Colors will be the same as stat_col
+#' @param draw_sig Whether significance lines should be drawn. Default is T. Colors will be the same as stat_col
 #' @param sig_level If to draw significance lines, at what level? Default is c(0.95,0.95). For single-part tests (BM and BB1p) only the first element is used
-#' @param x2axis=T If true, draws a second x-axis (on top) showing predicted risks
-#' @param y2axis=T If true, draws a second y-axis (on right) showing scaled partial sums
+#' @param x2axis If true, draws a second x-axis (on top) showing predicted risks
+#' @param y2axis If true, draws a second y-axis (on right) showing scaled partial sums
 #' @param ... Parameters to be passed to plot()
 #' @export
 plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stat=T, stat_col=c('blue','red'), draw_sig=T, sig_level=c(0.95,0.95), x2axis=T, y2axis=T, ...)
@@ -313,7 +313,7 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stat=T, stat_col=c
   sig_p1 <- sig_p2 <- 0 #0 indicates do not draw signifcance lines
   if(draw_sig)
   {
-    sig_p1 <- qnorm(1-(1-sig_level[1])/2)
+    sig_p1 <- stats::qnorm(1-(1-sig_level[1])/2)
 
     if(method %in% c("BM"))
     {
@@ -434,12 +434,12 @@ plot.cumulcalib <- function(cumulcalib_obj, method=NULL, draw_stat=T, stat_col=c
 
 
 
-pKolmogorov2 <- function(x, n=100)
-{
-  d <- x/sqrt(n)
-  X <- seq(from=0, to=1-d, length.out=n)
-  1-ks.test(X,punif, exact=F)$p.value
-}
+# pKolmogorov2 <- function(x, n=100)
+# {
+#   d <- x/sqrt(n)
+#   X <- seq(from=0, to=1-d, length.out=n)
+#   1-ks.test(X,punif, exact=F)$p.value
+# }
 
 
 

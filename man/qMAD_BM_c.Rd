@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{qMAD_BM_c}
 \alias{qMAD_BM_c}
-\title{Quantile function of the distribution of the maximum absolute deviation of Brownian motion in \link{0,1} interval, conditional on its terminal value}
+\title{Quantile function of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value}
 \usage{
 qMAD_BM_c(p, w1)
 }
@@ -15,5 +15,5 @@ qMAD_BM_c(p, w1)
 a scalar value
 }
 \description{
-Quantile function of the distribution of the maximum absolute deviation of Brownian motion in \link{0,1} interval, conditional on its terminal value
+Quantile function of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value
 }

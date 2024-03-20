@@ -9,7 +9,7 @@ pKolmogorov(q, summands = ceiling(q * sqrt(72) + 3/2))
 \arguments{
 \item{q}{the quantity at which CDF will be evaluated. Currently accepts only a scalar}
 
-\item{sumands}{maximum number of terms to be evaluated in the infinite series (default=ceiling(q*sqrt(72)+3/2))}
+\item{summands}{maximum number of terms to be evaluated in the infinite series (default=ceiling(q*sqrt(72)+3/2))}
 }
 \value{
 a scalar value

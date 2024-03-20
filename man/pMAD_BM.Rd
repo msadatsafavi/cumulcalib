@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{pMAD_BM}
 \alias{pMAD_BM}
-\title{CDF of the distribution of the maximum absolute deviation of Brownian motion in \link{0,1} interval}
+\title{CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval}
 \usage{
 pMAD_BM(q, summands = 100)
 }
@@ -15,5 +15,5 @@ pMAD_BM(q, summands = 100)
 a scalar value
 }
 \description{
-CDF of the distribution of the maximum absolute deviation of Brownian motion in \link{0,1} interval
+CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval
 }

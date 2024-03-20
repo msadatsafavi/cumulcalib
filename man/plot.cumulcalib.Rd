@@ -25,15 +25,15 @@
 
 \item{stat_col}{The color(s) to draw the stat. Default is c('blue','red'). For single-part tests (BM and BB1p) only the first element is used}
 
+\item{draw_sig}{Whether significance lines should be drawn. Default is T. Colors will be the same as stat_col}
+
 \item{sig_level}{If to draw significance lines, at what level? Default is c(0.95,0.95). For single-part tests (BM and BB1p) only the first element is used}
 
+\item{x2axis}{If true, draws a second x-axis (on top) showing predicted risks}
+
+\item{y2axis}{If true, draws a second y-axis (on right) showing scaled partial sums}
+
 \item{...}{Parameters to be passed to plot()}
-
-\item{draw_sigs}{Whether significance lines should be drawn. Default is T. Colors will be the same as stat_col}
-
-\item{x2axis=T}{If true, draws a second x-axis (on top) showing predicted risks}
-
-\item{y2axis=T}{If true, draws a second y-axis (on right) showing scaled partial sums}
 }
 \value{
 None

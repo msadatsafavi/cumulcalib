@@ -1,11 +1,13 @@
 ---
 title: "A tutorial on the cumulative calibration assessment and the cumulcalib package"
+author: "Mohsen Sadatsafavi"
+date: "`r Sys.Date()`"
 output:
-  pdf_document: default
-  rmarkdown::html_vignette: default
   html_document:
     df_print: paged
-vignette: "%\\VignetteIndexEntry{cumulcalib} %\\VignetteEngine{knitr::rmarkdown} %\\VignetteEncoding{UTF-8}\n"
+  rmarkdown::html_vignette: default
+  pdf_document: default
+vignette: "%\\VignetteIndexEntry{cumulcalibPAckage} %\\VignetteEngine{knitr::rmarkdown} %\\VignetteEncoding{UTF-8}\n"
 ---
 
 ```{r, include = FALSE}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{pMAD_BM_c}
 \alias{pMAD_BM_c}
-\title{CDF of the distribution of the maximum absolute deviation of Brownian motion in \link{0,1} interval, conditional on its terminal value}
+\title{CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value}
 \usage{
 pMAD_BM_c(
   q,
@@ -19,13 +19,13 @@ pMAD_BM_c(
 
 \item{method}{different infinite series to use (1,2,3)}
 
-\item{summands}{number of terms to evaluate (default is ceiling(q * sqrt(72) + 3/2))}
+\item{exp_tolerance}{numerical tolerance as the stopping rule when evaluating the infinite sum (default -30 on the expotential scale)}
 
-\item{tolerance}{numerical tolerance as the stopping rule when evaluating the infinite sum (default -30 on the expotential scale)}
+\item{summands}{number of terms to evaluate (default is ceiling(q * sqrt(72) + 3/2))}
 }
 \value{
 a scalar value
 }
 \description{
-CDF of the distribution of the maximum absolute deviation of Brownian motion in \link{0,1} interval, conditional on its terminal value
+CDF of the distribution of the maximum absolute deviation of Brownian motion in [0,1] interval, conditional on its terminal value
 }
