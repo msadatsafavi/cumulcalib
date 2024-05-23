@@ -114,8 +114,36 @@ The blue and red vertical lines, respectively, show the terminal value of the ra
 
 Here it is obvious that neither the terminal value (mean calibration error) nor the maximum deviation reach statistical significance. 
 
-## What about a miscalibrated model?
-To demonstrate how a miscalibrated model might lool, we repeat the above steps, this time fitting a model based on only a subsample of 500 rows from the development sample. The intuition is that because of the small development sample, the model might not be calibrated.
+
+
+## How do different forms of miscalibrations look on the cumulative calibration plot?
+
+### A model that underestimates the risk
+Let's start with a model that under-estimates the risk. We mimic this by applying an odds-ratio of 0.75 to predicted risks.
+```{r}
+  val_data$pi2 <- val_data$pi*0.75/(1-val_data$pi*(1-0.75)) #One-shot transformation of risk to odds and back
+  res <- cumulcalib(val_data$y, val_data$pi2) 
+  predtools::calibration_plot(val_data, obs="y", pred="pi2")
+  plot(res)
+```
+
+As can be seen above, when predicted risks are systematically smaller than actual risks, prediction errors are generally positive, resulting in a generally ascending curve. Clearly, the Z-test component of the bridge test is rejected at 0.05 level (the overall p-value for moderate calibration is `r res$pval`).
+
+
+### A model that overestimates the risk
+We mimic this by applying an odds-ratio of 1.25 to predicted risks.
+```{r}
+  val_data$pi2 <- val_data$pi*1.25/(1-val_data$pi*(1-1.25)) #One-shot transformation of risk to odds and back
+  res <- cumulcalib(val_data$y, val_data$pi2) 
+  predtools::calibration_plot(val_data, obs="y", pred="pi2")
+  plot(res)
+```
+
+Here, the opposite happens: when predicted risks are systematically larger than actual risks, prediction errors are generally negative, resulting in a generally descending curve. Clearly, the Z-test component of the bridge test is rejected at 0.05 level (the overall p-value for moderate calibration is `r res$pval`).
+
+
+### Overfitted model
+To demonstrate how an overfitted model might look, we refit the model based on only a subsample of 500 rows from the development sample. The intuition is that because of the small development sample, the model might not be calibrated. In particular, it might be overfitted.
 
 ```{r}
   dev_data2 <- dev_data[sample(nrow(dev_data), 500, replace=F),]
@@ -141,3 +169,6 @@ Here, the miscalibration is quite obvious: the model seems to be making under-es
 If we repeat the similar steps for inference, we will obtain the following p-values: `r res2$pval_by_component[1]` for mean miscalibration, `r res2$pval_by_component[2]` for the bridge component, and `r res2$pval` for the unified test, clearly indicating miscalibration.
 
 In this case, it is obvious that the model is mean-calibrated, but the bridge component of the two-part Browniann bridge test rejects the hypothesis that the model is calibrated. 
+
+
+
