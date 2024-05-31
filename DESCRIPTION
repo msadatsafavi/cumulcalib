@@ -1,10 +1,10 @@
 Package: cumulcalib
-Title: Cumulative calibration assessment
+Title: Cumulative Calibration assessment
 Version: 0.0.0.9000
 Authors@R: 
-    person("Mohsen", "Sadatsafavi", , "Mohsen.sadatsafavi@ubc.ca", role = c("aut", "cre"),
+    person("Mohsen", "Sadatsafavi", , "mohsen.sadatsafavi@ubc.ca", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0419-7862"))
-Description: What the package does (one paragraph).
+Description: This package implements the cumulative calibration error assessment for risk prediction models.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -16,6 +16,8 @@ Suggests:
     knitr,
     rmarkdown,
     markdown,
-    predtools
+    predtools,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 URL: https://msadatsafavi.github.io/cumulcalib/
+Config/testthat/edition: 3

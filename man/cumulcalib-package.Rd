@@ -4,9 +4,9 @@
 \name{cumulcalib-package}
 \alias{cumulcalib-package}
 \alias{_PACKAGE}
-\title{cumulcalib: Cumulative calibration assessment}
+\title{cumulcalib: Cumulative Calibration assessment}
 \description{
-What the package does (one paragraph).
+This package implements the cumulative calibration error assessment for risk prediction models.
 }
 \seealso{
 Useful links:
@@ -16,7 +16,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Mohsen Sadatsafavi \email{Mohsen.sadatsafavi@ubc.ca} (\href{https://orcid.org/0000-0002-0419-7862}{ORCID})
+\strong{Maintainer}: Mohsen Sadatsafavi \email{mohsen.sadatsafavi@ubc.ca} (\href{https://orcid.org/0000-0002-0419-7862}{ORCID})
 
 }
 \keyword{internal}

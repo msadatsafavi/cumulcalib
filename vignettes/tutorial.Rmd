@@ -27,7 +27,7 @@ library(knitr)
 
 _cumulcalib_ is an R package for the implementation of the cumulative calibration assessment for risk prediction models. 
 
-In order to use _cumulcalib_ efficiently you should be reasonably familiar with the underlying statistical methodologt. please visit the related publication. You can also read the other vignette in this package that covers the basic idea. 
+In order to use _cumulcalib_ efficiently you should be reasonably familiar with the underlying statistical methodology. please visit the related publication. You can also read the other vignette in this package that covers the basic idea. 
 
 We illustrate the use of this package through a running example.
 
@@ -82,7 +82,7 @@ the resulting partial sum, after suitable standardization, will converge to the 
 details of such standardization is provided in the original publication. In brief, for the convergence to Brownian motion to work, the 'time' jump at step i should be proportional to the variance of $y_i$, which, under the hypothesis that the model is calibrated, is $\pi_i(1-\pi_i)$. This approach does not require any regulrization.
 
 ### Using _cumulcalib_ package for calibration assessment
-To assess cumulative calibration using this approach via the _cumujlcalib_ package, we use a simple function call and store the results:
+To assess cumulative calibration using this approach via the _cumulcalib_ package, we use a simple function call and store the results:
 
 ```{r}
   library(cumulcalib)
@@ -97,7 +97,7 @@ summary(res)
 
 The summary will always report two metrics: $C_n$, which is the sample estimate of mean calibration error ($E(y-\pi)$), and $C^*$ which is a the maximum absolute cumulative prediction error, divided by the number of observations. $C^*$ is a 'distance' metric, similar to metrics such as Emax or the Integrated Calibration Index.
 
-The other components in the summary depend on the Method requested for inference on model calibration. The default method is the Brownian Bridge test, which operates by combining two statistic: $C_n$, and maximum absolute deviation of the random walk from the line that connects its origin and end points. The test statistic related to the former is $S_n$, which is the Z score for mean calibration error with a unit normal distirbution under the null hypothesis, and $B^*$ for the latter, which has a Kolmogorov distribution under the null hypothesis.
+The other components in the summary depend on the Method requested for inference on model calibration. The default method is the Brownian Bridge test, which operates by combining two statistic: $C_n$, and maximum absolute deviation of the random walk from the line that connects its origin and end points. The test statistic related to the former is $S_n$, which is the Z score for mean calibration error with a unit normal distribution under the null hypothesis, and $B^*$ for the latter, which has a Kolmogorov distribution under the null hypothesis.
 
 Because it can be shown that these two statistics are independent, one combined p-value can be generated using the Fisher's method.
 
@@ -171,7 +171,7 @@ Here, the miscalibration is quite obvious: the model seems to be making under-es
 
 If we repeat the similar steps for inference, we will obtain the following p-values: `r res2$pval_by_component[1]` for mean miscalibration, `r res2$pval_by_component[2]` for the bridge component, and `r res2$pval` for the unified test, clearly indicating miscalibration.
 
-In this case, it is obvious that the model is mean-calibrated, but the bridge component of the two-part Browniann bridge test rejects the hypothesis that the model is calibrated. 
+In this case, it is obvious that the model is mean-calibrated, but the bridge component of the two-part Brownian bridge test rejects the hypothesis that the model is calibrated. 
 
 
 
