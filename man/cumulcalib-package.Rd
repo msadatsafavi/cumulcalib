@@ -2,8 +2,8 @@
 % Please edit documentation in R/cumulcalib-package.R
 \docType{package}
 \name{cumulcalib-package}
-\alias{cumulcalib}
 \alias{cumulcalib-package}
+\alias{_PACKAGE}
 \title{cumulcalib: Cumulative calibration assessment}
 \description{
 What the package does (one paragraph).

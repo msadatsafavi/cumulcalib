@@ -7,7 +7,10 @@ output:
   rmarkdown::html_vignette: default
   html_document:
     df_print: paged
-vignette: "%\\VignetteIndexEntry{cumulcalibPAckage} %\\VignetteEngine{knitr::rmarkdown} %\\VignetteEncoding{UTF-8}\n"
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{cumulcalib package tutorial}
+  %\usepackage[utf8]{inputenc}
 ---
 
 ```{r, include = FALSE}

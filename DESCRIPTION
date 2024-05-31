@@ -14,6 +14,8 @@ Imports:
     stats
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    markdown,
+    predtools
 VignetteBuilder: knitr
 URL: https://msadatsafavi.github.io/cumulcalib/
