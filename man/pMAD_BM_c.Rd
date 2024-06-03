@@ -19,7 +19,7 @@ pMAD_BM_c(
 
 \item{method}{different infinite series to use (1,2,3)}
 
-\item{exp_tolerance}{numerical tolerance as the stopping rule when evaluating the infinite sum (default -30 on the expotential scale)}
+\item{exp_tolerance}{numerical tolerance as the stopping rule when evaluating the infinite sum (default -30 on the exponential scale)}
 
 \item{summands}{number of terms to evaluate (default is ceiling(q * sqrt(72) + 3/2))}
 }

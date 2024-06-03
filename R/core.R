@@ -475,50 +475,48 @@ summary.cumulcalib <- function(object, method=NULL, ...)
   }
 
   n <- dim(object$data)[1]
-  print(paste("C_n (mean calibration error):",object$C_n))
-  print(paste("C* (maximum absolute cumulative calibration error):",object$C_star))
+  writeLines(paste("C_n (mean calibration error):",object$C_n))
+  writeLines(paste("C* (maximum absolute cumulative calibration error):",object$C_star))
 
-  if(method=="BM")
+  if(method=="BM" || method=="BM1p")
   {
-    print("Method: One-part Brownian Motion (BM)")
-    print(paste("S* (test statistic for cumulative calibration error):",object$S_star))
-    print(paste("P-value:",object$by_method$BM$pval))
-    print(paste("Location of maximum drift:",object$by_method$BM$loc,
+    writeLines("Method: One-part Brownian Motion (BM)")
+    writeLines(paste("S* (test statistic for cumulative calibration error):",object$S_star))
+    writeLines(paste("p-value:",object$by_method$BM$pval))
+    writeLines(paste("Location of maximum drift:",object$by_method$BM$loc,
                 " | time value:", object$data[object$by_method$BM$loc,'t'],
                 " | predictor value:", object$data[object$by_method$BM$loc,'X']))
   }
   if(method=="BM2p")
   {
-    print("Method: Two-part Brownian Motion (BM2p)")
-    print(paste("S_n (Z score for mean calibration error)",object$S_n))
-    print(paste("S* (test statistic for cumulative calibration error):",object$S_star))
-    print(object$by_method$BM2p$stat_by_component)
-    print("Component-wise p-values:")
-    print(object$by_method$BM2p$pval_by_component)
-    print(paste("Combined value (Fisher'smethod):",object$by_method$BM2p$pval))
-    print(paste("Location of maximum drift:",object$by_method$BM2p$loc,
+    writeLines("Method: Two-part Brownian Motion (BM2p)")
+    writeLines(paste("S_n (Z score for mean calibration error)",object$S_n))
+    writeLines(paste("S* (test statistic for cumulative calibration error):",object$S_star))
+    writeLines(paste0("Component-wise p-values: mean calibration=", object$by_method$BM2p$pval_by_component[1], " | Distance=", object$by_method$BM2p$pval_by_component[2]))
+    writeLines(object$by_method$BM2p$pval_by_component)
+    writeLines(paste("Combined p-value (Fisher's method):",object$by_method$BM2p$pval))
+    writeLines(paste("Location of maximum drift:",object$by_method$BM2p$loc,
                 " | time value:", object$data[object$by_method$BM2p$loc,'t'],
                 " | predictor value:", object$data[object$by_method$BM2p$loc,'X']))
   }
   if(method=="BB1p")
   {
-    print("Method: One-part Brownian Bridge (BB1p)")
-    print(paste("B* (test statistic for maximum absolute bridged calibration error):",object$B_star))
-    print(paste("Test statistic value:",object$by_method$BB1p$stat))
-    print(paste("P-value:",object$by_method$BB1p$pval))
-    print(paste("Location of maximum drift:",object$by_method$BB1p$loc,
+    writeLines("Method: One-part Brownian Bridge (BB1p)")
+    writeLines(paste("B* (test statistic for maximum absolute bridged calibration error):",object$B_star))
+    writeLines(paste("Test statistic value:",object$by_method$BB1p$stat))
+    writeLines(paste("p-value:",object$by_method$BB1p$pval))
+    writeLines(paste("Location of maximum drift:",object$by_method$BB1p$loc,
                 " | time value:", object$data[object$by_method$BB1p$loc,'t'],
                 " | predictor value:", object$data[object$by_method$BB1p$loc,'X']))
   }
-  if(method=="BB")
+  if(method=="BB" || method=="BB2p")
   {
-    print("Method: Two-part Brownian Bridge (BB)")
-    print(paste("S_n (Z score for mean calibration error)",object$S_n))
-    print(paste("B* (test statistic for maximum absolute bridged calibration error):",object$B_star))
-    print("Component-wise p-values:")
-    print(object$by_method$BB$pval_by_component)
-    print(paste("Combined value (Fisher'smethod):",object$by_method$BB$pval))
-    print(paste("Location of maximum drift:",object$by_method$BB$loc,
+    writeLines("Method: Two-part Brownian Bridge (BB)")
+    writeLines(paste("S_n (Z score for mean calibration error)",object$S_n))
+    writeLines(paste("B* (test statistic for maximum absolute bridged calibration error):",object$B_star))
+    writeLines(paste0("Component-wise p-values: mean calibration=", object$by_method$BB$pval_by_component[1], " | Distance (bridged)=", object$by_method$BB$pval_by_component[2]))
+    writeLines(paste("Combined p-value (Fisher's method):",object$by_method$BB$pval))
+    writeLines(paste("Location of maximum drift:",object$by_method$BB$loc,
                 " | time value:", object$data[object$by_method$BB$loc,'t'],
                 " | predictor value:", object$data[object$by_method$BB$loc,'X']))
   }
