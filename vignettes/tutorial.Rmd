@@ -27,7 +27,9 @@ library(knitr)
 
 _cumulcalib_ is an R package for the implementation of the cumulative calibration assessment for risk prediction models. 
 
-In order to use _cumulcalib_ efficiently you should be reasonably familiar with the underlying statistical methodology. Please visit the related publication (Sadatsafavi and Petkau, Statistics in Medicine, 2024 https://doi.org/10.1002/sim.10138). 
+If you use this approach for scientific work, please cite the original paper: {Sadatsafavi M, Petkau J, Statistics In Medicine, 2004 (doi: 10.1002/sim.10138)}
+
+In order to use _cumulcalib_ efficiently you should be reasonably familiar with the underlying statistical methodology. Please visit the related publication above (or the arxiv version: https://arxiv.org/abs/2307.09713). 
 
 We illustrate the use of this package, as well as basic interpretations of the cumulative calibration plots, through a running example.
 

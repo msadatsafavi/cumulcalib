@@ -4,14 +4,14 @@
 \name{cumulcalib-package}
 \alias{cumulcalib-package}
 \alias{_PACKAGE}
-\title{cumulcalib: Cumulative Calibration assessment}
+\title{cumulcalib: Cumulative Calibration Assessment For Prediction Models}
 \description{
-This package implements the cumulative calibration error assessment for risk prediction models.
+Tools for visualization of, and inference on, the calibration of prediction models on the cumulative calibration domain.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://msadatsafavi.github.io/cumulcalib/}
+  \item \url{https://github.com/resplab/cumulcalib}
 }
 
 }

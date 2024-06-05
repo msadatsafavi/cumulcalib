@@ -19,20 +19,23 @@ knitr::opts_chunk$set(
 [![R-CMD-check](https://github.com/msadatsafavi/cumulcalib/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/msadatsafavi/cumulcalib/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of cumulcalib is to enable the use of the assessment of risk prediction model calibration using the cumulative calibration methodology. 
+The goal of cumulcalib is to enable the use of the assessment of prediction model calibration using the cumulative calibration methodology. For more information, please refer to the original publication (arxiv version: https://arxiv.org/abs/2307.09713). The package also comes with a tutorial, which you can view after installing the package as
+
+``` r
+vignette("tutorial", package="cumulcalib")
+```
+
 
 ## Installation
 
 You can install the development version of cumulcalib from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("msadatsafavi/cumulcalib")
+# install.packages("remotes") #this package is necessary to connect to github
+remotes::install_github("resplab/cumulcalib")
 ```
 
 ## Example
-
-This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
 library(cumulcalib)
