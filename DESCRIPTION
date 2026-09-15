@@ -10,15 +10,8 @@ URL: https://github.com/resplab/cumulcalib
 Imports:
     graphics,
     stats
-Suggests: 
-    knitr,
-    predtools,
-    rmarkdown,
-    markdown,
-    spelling,
+Suggests:
     testthat (>= 3.0.0)
-VignetteBuilder: 
-    knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
