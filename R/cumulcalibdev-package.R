@@ -1,5 +1,5 @@
 #' @keywords internal
-#' @aliases cumulcalib-package
+#' @aliases cumulcalibdev-package
 "_PACKAGE"
 
 ## usethis namespace: start

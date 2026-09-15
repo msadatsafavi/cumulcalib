@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(cumulcalib)
+library(cumulcalibdev)
 
-test_check("cumulcalib")
+test_check("cumulcalibdev")
