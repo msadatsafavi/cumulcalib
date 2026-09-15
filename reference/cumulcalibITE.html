@@ -18,7 +18,7 @@ models that predict individual treatment effects (treatment benefit)."><!-- math
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cumulcalib</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.1.9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -58,7 +58,7 @@ models that predict individual treatment effects (treatment benefit)."><!-- math
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Cumulative calibration assessment for individual treatment effect (ITE) predictions</h1>
-    <small class="dont-index">Source: <a href="https://github.com/resplab/cumulcalib/blob/cumulcalibITE/R/core.R" class="external-link"><code>R/core.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/resplab/cumulcalib/blob/main/R/core.R" class="external-link"><code>R/core.R</code></a></small>
     <div class="hidden name"><code>cumulcalibITE.Rd</code></div>
     </div>
 
@@ -75,6 +75,7 @@ models that predict individual treatment effects (treatment benefit).</p>
 <span>  p <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BB"</span>, <span class="st">"BM"</span><span class="op">)</span>,</span>
 <span>  ordered <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ties <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="st">"random"</span>, <span class="st">"ignore"</span><span class="op">)</span>,</span>
 <span>  n_sim <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  aux <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -101,11 +102,15 @@ models that predict individual treatment effects (treatment benefit).</p>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>string with either BB (Brownian bridge test, default method), BM (Brownian motion test), BM2p (two-part BM test - experimental), BB1p (one-part BB test wit only the 'bridge' component). Multiple methods can be specified. The first one will be the 'main' method (e.g., when submitting the resulting object to plot()). Default is c("BB","BM")</p></dd>
+<dd><p>string with either BB (Brownian bridge test, default method), BM (Brownian motion test), BM2p (two-part BM test - experimental), BB1p (one-part BB test with only the 'bridge' component). Multiple methods can be specified. The first one will be the 'main' method (e.g., when submitting the resulting object to plot()). Default is c("BB","BM")</p></dd>
 
 
 <dt id="arg-ordered">ordered<a class="anchor" aria-label="anchor" href="#arg-ordered"></a></dt>
 <dd><p>if TRUE, the data are already ordered based on ascending values of h. This is to speed up simulations.</p></dd>
+
+
+<dt id="arg-ties">ties<a class="anchor" aria-label="anchor" href="#arg-ties"></a></dt>
+<dd><p>how to handle tied values of <code>h</code> (observations sharing the exact same predicted ITE). <code>"group"</code> (default) considers tied observations as one macro-observation and then averages out the time and location changes across tied observations. <code>"random"</code> randomly reorders tied observations; this is valid, but results will vary across runs unless a seed is set. <code>"ignore"</code> keeps tied observations in their input order.</p></dd>
 
 
 <dt id="arg-n-sim">n_sim<a class="anchor" aria-label="anchor" href="#arg-n-sim"></a></dt>
@@ -118,7 +123,7 @@ models that predict individual treatment effects (treatment benefit).</p>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>an objective of class cumulcalib that can be printed or plotted</p>
+    <p>an object of class cumulcalib that can be printed or plotted</p>
     </div>
 
     <div id="ref-examples">

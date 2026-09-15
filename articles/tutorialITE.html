@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cumulcalib</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.1.9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -87,7 +87,7 @@ Sadatsafavi</h4>
             
             <h4 data-toc-skip class="date">2026-09-15</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/resplab/cumulcalib/blob/cumulcalibITE/vignettes/tutorialITE.Rmd" class="external-link"><code>vignettes/tutorialITE.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/resplab/cumulcalib/blob/main/vignettes/tutorialITE.Rmd" class="external-link"><code>vignettes/tutorialITE.Rmd</code></a></small>
       <div class="hidden name"><code>tutorialITE.Rmd</code></div>
 
     </div>
@@ -209,6 +209,7 @@ generally has higher power.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/resplab/cumulcalib" class="external-link">cumulcalib</a></span><span class="op">)</span></span>
 <span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cumulcalibITE.html">cumulcalibITE</a></span><span class="op">(</span><span class="va">val_data</span><span class="op">$</span><span class="va">y</span>, h <span class="op">=</span> <span class="va">val_data</span><span class="op">$</span><span class="va">d</span>, a <span class="op">=</span> <span class="va">val_data</span><span class="op">$</span><span class="va">a</span>, method <span class="op">=</span> <span class="st">"BB"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; cumulcalibITE: 96 groups of tied predicted ITE values (196 of 17168 observations) detected; redistributing the total location/variance change within each tied group evenly across its observations (ties = "group").</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Moderate calibration assessment of individualized treatment effects</span></span>
 <span><span class="co">#&gt; Approach: marginal</span></span>
@@ -249,13 +250,16 @@ method used for risks:</p>
 standardized
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>S</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{S\}</annotation></semantics></math>
 process; the top X-axis shows the corresponding predicted ITEs, and the
-right Y-axis shows the scaled (un-standardized) cumulative errors, whose
-terminal value is <code>C_n</code>. The blue markings relate to the
-mean-calibration component (the terminal value and its significance
-threshold) and the red markings to the bridge component. One quirk
-specific to the marginal approach is that, because the marginal variance
-is not guaranteed to be monotone, the process can occasionally show
-small negative time increments.</p>
+right Y-axis shows the scaled (unstandardized) cumulative errors, whose
+terminal value is <code>C_n</code>. The blue vertical line marks the
+mean-calibration component (the terminal value of the random walk) and
+the red vertical line the bridge component. By default their
+significance thresholds are not drawn; pass
+<code>stats_config = list(lines = "vh")</code> to <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to
+add them as dashed lines of the same color. One quirk specific to the
+marginal approach is that, because the marginal variance is not
+guaranteed to be monotone, the process can occasionally show small
+negative time increments.</p>
 </div>
 <div class="section level2">
 <h2 id="the-conditional-approach">The conditional approach<a class="anchor" aria-label="anchor" href="#the-conditional-approach"></a>
